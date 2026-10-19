@@ -21,7 +21,7 @@
     "SITE_URL": "https://personal-blog.stock-backend-wkl.workers.dev",
     "ENVIRONMENT": "production",
     "AUTH_DEV_MODE": "false",
-    "ARCHIVES_ENABLED": "false",
+    "ARCHIVES_ENABLED": "true",
     "ARCHIVE_PUBLICATION_ENABLED": "false"
   },
   "observability": {
