@@ -1,6 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { SessionUser, User } from '@/types/domain';
-import { execute, queryOne } from './client';
+import { DatabaseError, execute, queryOne } from './client';
 
 interface UserRow {
   id: string;
@@ -61,19 +61,29 @@ export async function upsertUser(db: D1Database, input: {
 }): Promise<User> {
   const existing = await getUserByGithubId(db, input.githubId);
   if (existing) {
-    await execute(
-      db,
-      `UPDATE users SET
-         username = ?,
-         display_name = ?,
-         email = ?,
-         avatar_url = ?,
-         role = CASE WHEN role = 'admin' THEN 'admin' ELSE ? END,
-         updated_at = datetime('now'),
-         updated_by = ?
-       WHERE id = ?`,
-      [input.username, input.displayName, input.email, input.avatarUrl, input.role, existing.id, existing.id]
-    );
+    try {
+      await execute(
+        db,
+        `UPDATE users SET
+           username = ?,
+           display_name = ?,
+           email = ?,
+           avatar_url = ?,
+           role = CASE WHEN role = 'admin' THEN 'admin' ELSE ? END,
+           updated_at = datetime('now'),
+           updated_by = ?
+         WHERE id = ?`,
+        [input.username, input.displayName, input.email, input.avatarUrl, input.role, existing.id, existing.id]
+      );
+    } catch (error) {
+      // Published archive-linked author fields are frozen. Identity/email/role sync must not break login.
+      const cause = error instanceof DatabaseError ? error.cause : null;
+      if (!(cause instanceof Error) || !cause.message.includes('ARCHIVE_PUBLICATION_CONFIRM_REQUIRED')) { throw error; }
+      await execute(db,
+        "UPDATE users SET email = ?, role = CASE WHEN role = 'admin' THEN 'admin' ELSE ? END, " +
+        "updated_at = datetime('now'), updated_by = ? WHERE id = ? AND github_id = ? AND deleted_at IS NULL",
+        [input.email, input.role, existing.id, existing.id, input.githubId]);
+    }
     const updated = await getUserByGithubId(db, input.githubId);
     if (!updated) {
       throw new Error('用户更新后读取失败');

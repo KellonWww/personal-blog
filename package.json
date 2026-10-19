@@ -16,6 +16,7 @@
     "db:local:seed": "wrangler d1 execute personal-blog-db --local --file=./migrations/0002_seed.sql",
     "db:local:init": "npm run db:local:migrate && npm run db:local:seed",
     "smoke": "node scripts/smoke.mjs",
+    "archives:import": "node scripts/import-archives.mjs",
     "deploy": "npm run build && wrangler deploy",
     "predev": "node scripts/sync-mermaid.mjs",
     "prebuild": "node scripts/sync-mermaid.mjs"

@@ -5,6 +5,10 @@ import type { PostDetail, PostStatus } from '@/types/domain';
 import { execute, queryAll, queryOne } from '@/server/db/client';
 import { getPostById, getPostBySlug } from '@/server/db/content';
 
+export class PostValidationError extends Error {
+  constructor(message: string) { super(message); this.name = 'PostValidationError'; }
+}
+
 export interface PostInput {
   title: string;
   slug?: string;
@@ -27,7 +31,7 @@ async function assertSlugAvailable(db: D1Database, slug: string, excludeId?: str
     excludeId ? [slug, excludeId] : [slug]
   );
   if (row) {
-    throw new Error('文章路径已被占用，请换一个 slug');
+    throw new PostValidationError('文章路径已被占用，请换一个 slug');
   }
 }
 
@@ -69,7 +73,7 @@ export async function updatePost(db: D1Database, id: string, input: PostInput, o
   await assertSlugAvailable(db, slug, id);
   const current = await getPostById(db, id);
   if (!current) {
-    throw new Error('文章不存在');
+    throw new PostValidationError('文章不存在');
   }
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
   const publishedAt = input.status === 'published' ? (current.publishedAt ?? now) : null;

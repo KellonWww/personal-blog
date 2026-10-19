@@ -6,7 +6,8 @@ import { queryOne } from '@/server/db/client';
 import { listPosts } from '@/server/db/content';
 import { listModerationQueue, updateModerationStatus } from '@/server/db/interactions';
 import { getSiteSettings, upsertSetting } from '@/server/db/settings';
-import { createPost, getAdminPost, listSelectableTaxonomy, softDeletePost, updatePost } from '@/server/services/posts';
+import { createPost, getAdminPost, listSelectableTaxonomy, PostValidationError, softDeletePost, updatePost } from '@/server/services/posts';
+import postActions from '@/server/routes/post-actions';
 import type { AppBindings } from '@/server/types';
 
 const admin = new Hono<AppBindings>();
@@ -83,6 +84,8 @@ function operator(c: { get: (key: 'user') => AppBindings['Variables']['user'] })
   return c.get('user')?.id ?? '';
 }
 
+admin.route('/', postActions);
+
 admin.get('/admin/posts', async (c) => {
   const query = c.req.query();
   const status = query.status === 'published' || query.status === 'draft' ? query.status : 'all';
@@ -115,7 +118,8 @@ admin.post('/admin/posts', async (c) => {
     const post = await createPost(c.env.DB, parsed.data, operator(c));
     return c.json(ok(post), 201);
   } catch (error) {
-    return c.json(fail('POST_CREATE_FAILED', error instanceof Error ? error.message : '创建失败'), 400);
+    if (error instanceof PostValidationError) { return c.json(fail('POST_CREATE_FAILED', error.message), 400); }
+    return c.json(fail('POST_CREATE_FAILED', '文章创建结果不明，请重新读取核对'), 500);
   }
 });
 
@@ -129,7 +133,12 @@ admin.put('/admin/posts/:id', async (c) => {
     const post = await updatePost(c.env.DB, c.req.param('id'), parsed.data, operator(c));
     return c.json(ok(post));
   } catch (error) {
-    return c.json(fail('POST_UPDATE_FAILED', error instanceof Error ? error.message : '更新失败'), 400);
+    if (error instanceof Error && error.message.includes('ARCHIVE_PUBLICATION_CONFIRM_REQUIRED')) {
+      return c.json(fail('ARCHIVE_PUBLICATION_CONFIRM_REQUIRED', '档案关联稿须先撤回草稿，再从档案关联记录审阅确认发布；不能通过普通编辑入口直接发布'), 409);
+    }
+    if (error instanceof PostValidationError) { return c.json(fail('POST_UPDATE_FAILED', error.message), 400); }
+    // Drafts can now contain private archive text; never return raw driver messages.
+    return c.json(fail('POST_UPDATE_FAILED', '文章更新结果不明，请重新读取核对'), 500);
   }
 });
 

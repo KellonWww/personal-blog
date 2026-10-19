@@ -6,10 +6,12 @@ import AdminOverview from './AdminOverview';
 import PostManager from './PostManager';
 import ModerationManager from './ModerationManager';
 import SiteSettings from './SiteSettings';
+import ArchiveManager from './ArchiveManager';
 
 const DESCRIPTIONS: Record<AdminView, string> = {
   overview: '看看花园的近况，继续今天的写作。',
   posts: '让每一篇文章有序生长，从草稿到发布。',
+  archives: '只属于你的文本档案，与公开文章分开存放。',
   moderation: '回应读者，照看评论与留言。',
   settings: '维护站点资料，让花园保持自己的样子。'
 };
@@ -20,10 +22,10 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
-  const [settingsDirty, setSettingsDirty] = useState(false);
+  const [workspaceDirty, setWorkspaceDirty] = useState(false);
   const dirtyRef = useRef(false);
   const viewRef = useRef<AdminView>('overview');
-  dirtyRef.current = settingsDirty;
+  dirtyRef.current = workspaceDirty;
   viewRef.current = view;
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -31,12 +33,13 @@ export default function AdminDashboard() {
     function syncView() {
       const next = new URLSearchParams(window.location.search).get('view');
       const nextView = ADMIN_NAV.find((item) => item.key === next)?.key ?? 'overview';
-      if (dirtyRef.current && nextView !== viewRef.current && !window.confirm('站点设置尚未保存，确认离开？')) {
+      if (dirtyRef.current && nextView !== viewRef.current && !window.confirm('当前页面有未保存修改，确认离开？')) {
         const url = new URL(window.location.href);
         url.searchParams.set('view', viewRef.current);
         window.history.replaceState(null, '', url);
         return;
       }
+      if (nextView !== viewRef.current) { setWorkspaceDirty(false); }
       setView(nextView);
     }
     syncView();
@@ -60,7 +63,8 @@ export default function AdminDashboard() {
 
   function navigate(next: AdminView) {
     if (next === view) return;
-    if (settingsDirty && !window.confirm('站点设置尚未保存，确认离开？')) return;
+    if (workspaceDirty && !window.confirm('当前页面有未保存修改，确认离开？')) return;
+    setWorkspaceDirty(false);
     setView(next);
     const url = new URL(window.location.href);
     url.searchParams.set('view', next);
@@ -68,7 +72,7 @@ export default function AdminDashboard() {
   }
 
   async function logout() {
-    if (settingsDirty && !window.confirm('站点设置尚未保存，确认退出？')) return;
+    if (workspaceDirty && !window.confirm('当前页面有未保存修改，确认退出？')) return;
     setLoggingOut(true);
     try {
       await adminRequest('/api/auth/logout', adminWrite(user?.csrfToken ?? '', 'POST'));
@@ -83,8 +87,9 @@ export default function AdminDashboard() {
       {loading ? <div role="status" className="admin-empty">正在加载管理空间…</div> : user && <>
         {view === 'overview' && <AdminOverview userName={user.displayName || user.username} onNavigate={navigate} />}
         {view === 'posts' && <PostManager token={user.csrfToken} />}
+        {view === 'archives' && <ArchiveManager token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
         {view === 'moderation' && <ModerationManager token={user.csrfToken} />}
-        {view === 'settings' && <SiteSettings token={user.csrfToken} onDirtyChange={setSettingsDirty} />}
+        {view === 'settings' && <SiteSettings token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
       </>}
     </AdminShell>
   );

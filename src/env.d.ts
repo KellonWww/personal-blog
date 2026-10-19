@@ -9,6 +9,11 @@ declare namespace Cloudflare {
     SITE_URL: string;
     ENVIRONMENT: 'development' | 'production';
     AUTH_DEV_MODE?: string;
+    /** Only enable after manual archive migrations and isolated D1 verification. */
+    ARCHIVES_ENABLED?: string;
+    /** Separate opt-in after manual 0007 verification; secret is configured outside Git. */
+    ARCHIVE_PUBLICATION_ENABLED?: string;
+    ARCHIVE_PUBLICATION_SECRET?: string;
     GITHUB_CLIENT_ID?: string;
     GITHUB_CLIENT_SECRET?: string;
     GITHUB_ADMIN_USERNAME?: string;
