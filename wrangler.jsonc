@@ -18,7 +18,7 @@
     }
   ],
   "vars": {
-    "SITE_URL": "https://personal-blog.stock-backend-wkl.workers.dev",
+    "SITE_URL": "https://blog.kalevip.top",
     "ENVIRONMENT": "production",
     "AUTH_DEV_MODE": "false",
     "ARCHIVES_ENABLED": "true",
