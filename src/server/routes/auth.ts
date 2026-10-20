@@ -37,7 +37,7 @@ auth.get('/auth/callback', async (c) => {
   const cookieState = getCookie(c, stateName) ?? '';
   const saved = safeJsonParse<{ state?: unknown; returnTo?: unknown } | null>(getCookie(c, stateName + '_return') ?? '', null);
   const returnTo = saved?.state === state && typeof saved.returnTo === 'string' ? loginDestination(saved.returnTo) : '/admin';
-  deleteCookie(c, stateName + '_return', { path: stateOptions.path });
+  deleteCookie(c, stateName + '_return', stateOptions);
   if (!code || !state) {
     return c.redirect('/admin/login?' + new URLSearchParams({ error: 'oauth_denied', returnTo }));
   }
@@ -45,7 +45,7 @@ auth.get('/auth/callback', async (c) => {
     const token = await completeGitHubLogin(env.DB, env, code, state, cookieState);
     const { name, options } = sessionCookie(env);
     setCookie(c, name, token, options);
-    deleteCookie(c, stateName, { path: stateOptions.path });
+    deleteCookie(c, stateName, stateOptions);
     return c.redirect(returnTo);
   } catch (error) {
     console.error('[auth] OAuth 回调失败', error);
@@ -80,10 +80,10 @@ auth.post('/auth/logout', async (c) => {
   if (!user) {
     return c.json(fail('UNAUTHORIZED', '未登录'), 401);
   }
-  const { name } = sessionCookie(c.env);
+  const { name, options } = sessionCookie(c.env);
   const token = getCookie(c, name);
   await revokeSession(c.env.DB, token);
-  deleteCookie(c, name, { path: '/' });
+  deleteCookie(c, name, options);
   return c.json(ok({ loggedOut: true }));
 });
 
