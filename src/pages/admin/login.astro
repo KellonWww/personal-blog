@@ -2,16 +2,21 @@
 import { env } from 'cloudflare:workers';
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import LoginForm from '@/components/LoginForm';
+import { loginDestination } from '@/lib/auth-redirect';
 
 const oauthEnabled = Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
 const devMode = env.ENVIRONMENT === 'development' && env.AUTH_DEV_MODE === 'true';
 const errorCode = Astro.url.searchParams.get('error') ?? '';
+const returnTo = loginDestination(Astro.url.searchParams.get('returnTo'));
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('Referrer-Policy', 'no-referrer');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
 
 <AdminLayout title="登录">
   <main class="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4 py-10">
-    <h1 class="mb-6 text-xl font-semibold">博客后台登录</h1>
-    <LoginForm client:load oauthEnabled={oauthEnabled} devMode={devMode} errorCode={errorCode} />
+    <h1 class="mb-6 text-xl font-semibold">{returnTo === '/admin' ? '博客后台登录' : '登录后阅读私人文库'}</h1>
+    <LoginForm client:load oauthEnabled={oauthEnabled} devMode={devMode} errorCode={errorCode} returnTo={returnTo} />
     <a href="/" class="mt-6 text-sm text-muted">← 返回站点</a>
   </main>
 </AdminLayout>

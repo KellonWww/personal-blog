@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
+import { loginDestination } from '@/lib/auth-redirect';
 import type { SessionUser } from '@/types/domain';
 
 interface Props {
   oauthEnabled: boolean;
   devMode: boolean;
   errorCode: string;
+  returnTo?: string;
 }
 
-export default function LoginForm({ oauthEnabled, devMode, errorCode }: Props) {
+export default function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }: Props) {
+  const destination = loginDestination(returnTo);
+  const privateReading = destination !== '/admin';
   const [user, setUser] = useState<SessionUser | null>(null);
   const [checking, setChecking] = useState(true);
   const [pending, setPending] = useState(false);
@@ -41,7 +45,7 @@ export default function LoginForm({ oauthEnabled, devMode, errorCode }: Props) {
         setMessage(payload.message ?? '开发登录不可用');
         return;
       }
-      window.location.href = '/admin';
+      window.location.href = destination;
     } catch {
       setMessage('网络异常，请稍后重试');
     } finally {
@@ -57,7 +61,10 @@ export default function LoginForm({ oauthEnabled, devMode, errorCode }: Props) {
     return (
       <div className="space-y-3">
         <p className="text-sm">已登录为 <strong>{user.displayName || user.username}</strong>{user.role === 'admin' ? '（管理员）' : ''}</p>
-        <a href="/admin" className="btn btn-primary">进入后台</a>
+        {privateReading && user.role !== 'admin' ? (
+          <p role="alert" className="text-sm text-muted">当前账号没有管理员权限，无法阅读私人文库。请在后台退出后使用管理员账号登录。</p>
+        ) : <a href={destination} className="btn btn-primary">{privateReading ? '继续阅读' : '进入后台'}</a>}
+        {privateReading && user.role !== 'admin' && <a href="/admin" className="btn">前往后台</a>}
       </div>
     );
   }
@@ -66,7 +73,7 @@ export default function LoginForm({ oauthEnabled, devMode, errorCode }: Props) {
     <div className="space-y-4">
       {errorCode && errorText[errorCode] && <p className="text-sm text-accent">{errorText[errorCode]}</p>}
       {oauthEnabled ? (
-        <a href="/api/auth/login" className="btn btn-primary w-full justify-center">使用 GitHub 登录</a>
+        <a href={'/api/auth/login?' + new URLSearchParams({ returnTo: destination })} className="btn btn-primary w-full justify-center">使用 GitHub 登录</a>
       ) : (
         <p className="border-l-2 border-accent-line pl-3 py-1 text-xs text-muted">GitHub OAuth 未配置，生产环境请补充 GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET。</p>
       )}

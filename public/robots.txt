@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /private-library
 
 Sitemap: https://blog.kalevip.top/sitemap.xml

@@ -82,7 +82,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <AdminShell active={view} title={ADMIN_NAV.find((item) => item.key === view)?.label ?? '工作台'} description={DESCRIPTIONS[view]} userName={user?.displayName || user?.username} onNavigate={navigate} onLogout={loggingOut ? undefined : logout} actions={<a href="/admin/editor" className="btn btn-primary">＋ 写文章</a>}>
+    <AdminShell active={view} title={ADMIN_NAV.find((item) => item.key === view)?.label ?? '工作台'} description={DESCRIPTIONS[view]} userName={user?.displayName || user?.username} onNavigate={navigate} onLogout={loggingOut ? undefined : logout} actions={<>{view === 'archives' && <a href="/private-library" className="btn">前台阅读 ↗</a>}<a href="/admin/editor" className="btn btn-primary">＋ 写文章</a></>}>
       {error && <div role="alert" className="admin-notice"><span>{error}</span><button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>重试</button></div>}
       {loading ? <div role="status" className="admin-empty">正在加载管理空间…</div> : user && <>
         {view === 'overview' && <AdminOverview userName={user.displayName || user.username} onNavigate={navigate} />}

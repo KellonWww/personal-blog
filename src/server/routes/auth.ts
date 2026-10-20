@@ -1,20 +1,31 @@
 import { Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { fail, ok } from '@/lib/api';
+import { loginDestination } from '@/lib/auth-redirect';
+import { safeJsonParse } from '@/lib/format';
 import { oauthStateCookie, sessionCookie } from '@/server/cookie';
 import { buildGitHubLogin, completeGitHubLogin, createDevelopmentSession, getCurrentSession, revokeSession } from '@/server/services/auth';
 import type { AppBindings } from '@/server/types';
 
 const auth = new Hono<AppBindings>();
 
+auth.use('/auth/*', async (c, next) => {
+  c.header('Cache-Control', 'private, no-store');
+  c.header('Referrer-Policy', 'no-referrer');
+  await next();
+});
+
 auth.get('/auth/login', async (c) => {
   const env = c.env;
+  const returnTo = loginDestination(c.req.query('returnTo'));
   if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
-    return c.redirect('/admin/login?error=oauth_not_configured');
+    return c.redirect('/admin/login?' + new URLSearchParams({ error: 'oauth_not_configured', returnTo }));
   }
   const { url, stateCookie } = await buildGitHubLogin(env.DB, env);
   const { name, options } = oauthStateCookie(env);
   setCookie(c, name, stateCookie, options);
+  // Bind the short-lived destination to this OAuth attempt, never to an arbitrary callback query.
+  setCookie(c, name + '_return', JSON.stringify({ state: stateCookie, returnTo }), options);
   return c.redirect(url);
 });
 
@@ -24,18 +35,21 @@ auth.get('/auth/callback', async (c) => {
   const state = c.req.query('state') ?? '';
   const { name: stateName, options: stateOptions } = oauthStateCookie(env);
   const cookieState = getCookie(c, stateName) ?? '';
+  const saved = safeJsonParse<{ state?: unknown; returnTo?: unknown } | null>(getCookie(c, stateName + '_return') ?? '', null);
+  const returnTo = saved?.state === state && typeof saved.returnTo === 'string' ? loginDestination(saved.returnTo) : '/admin';
+  deleteCookie(c, stateName + '_return', { path: stateOptions.path });
   if (!code || !state) {
-    return c.redirect('/admin/login?error=oauth_denied');
+    return c.redirect('/admin/login?' + new URLSearchParams({ error: 'oauth_denied', returnTo }));
   }
   try {
     const token = await completeGitHubLogin(env.DB, env, code, state, cookieState);
     const { name, options } = sessionCookie(env);
     setCookie(c, name, token, options);
     deleteCookie(c, stateName, { path: stateOptions.path });
-    return c.redirect('/admin');
+    return c.redirect(returnTo);
   } catch (error) {
     console.error('[auth] OAuth 回调失败', error);
-    return c.redirect('/admin/login?error=oauth_failed');
+    return c.redirect('/admin/login?' + new URLSearchParams({ error: 'oauth_failed', returnTo }));
   }
 });
 

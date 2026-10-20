@@ -28,6 +28,8 @@ type Env = Cloudflare.Env;
 
 declare namespace App {
   interface Locals {
+    /** Set only after administrator session and archive feature checks. */
+    privateLibraryAuthorized?: boolean;
     /** Astro Cloudflare 适配器注入的执行上下文（用于 waitUntil 等） */
     cfContext: ExecutionContext;
   }
