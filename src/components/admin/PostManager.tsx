@@ -13,6 +13,7 @@ export default function PostManager({ token }: { token: string }) {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
   const [categoryId, setCategoryId] = useState('');
+  const [privateDocument, setPrivateDocument] = useState('all');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(true);
@@ -38,6 +39,7 @@ export default function PostManager({ token }: { token: string }) {
     setSelected([]);
     setError('');
     const query = new URLSearchParams({ status, page: String(page), pageSize: String(pageSize), search, categoryId, order: 'updated' });
+    if (privateDocument !== 'all') query.set('privateDocument', privateDocument);
     Promise.all([
       adminRequest<Paginated<PostSummary>>('/api/admin/posts?' + query, { signal: controller.signal }),
       adminRequest<PostTaxonomy>('/api/admin/taxonomy', { signal: controller.signal })
@@ -49,7 +51,7 @@ export default function PostManager({ token }: { token: string }) {
     }).catch((reason: unknown) => { if (!controller.signal.aborted) setError(errorMessage(reason)); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [status, page, pageSize, search, categoryId, refresh]);
+  }, [status, page, pageSize, search, categoryId, privateDocument, refresh]);
 
   async function applyAction(posts: PostSummary[], action: PostManagerAction, taxonomyIds?: string[]) {
     if (lock.current || disabled || !posts.length) return;
@@ -94,7 +96,8 @@ export default function PostManager({ token }: { token: string }) {
         </form>
         <select className="field" aria-label="文章状态" value={status} disabled={busy} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="all">全部状态</option><option value="published">已发布</option><option value="draft">草稿</option></select>
         <select className="field" aria-label="文章分类" value={categoryId} disabled={busy} onChange={(event) => { setCategoryId(event.target.value); setPage(1); }}><option value="">全部分类</option>{taxonomy.categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-        {(search || status !== 'all' || categoryId) && <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setSearch(''); setSearchInput(''); setStatus('all'); setCategoryId(''); setPage(1); }}>重置</button>}
+        <select className="field" aria-label="是否为私文档" value={privateDocument} disabled={busy} onChange={(event) => { setPrivateDocument(event.target.value); setPage(1); }}><option value="all">是否为私文档：全部</option><option value="true">是否为私文档：是</option><option value="false">是否为私文档：否</option></select>
+        {(search || status !== 'all' || categoryId || privateDocument !== 'all') && <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setSearch(''); setSearchInput(''); setStatus('all'); setCategoryId(''); setPrivateDocument('all'); setPage(1); }}>重置</button>}
       </div>
       <PostBatchToolbar count={selectedPosts.length} disabled={disabled} taxonomy={taxonomy} onApply={(action, terms) => void applyAction(selectedPosts, action, terms)} onClear={() => setSelected([])} />
       {loading ? <div role="status" className="admin-empty">正在加载文章…</div> : error ? <div className="admin-empty">文章加载失败，请重试。</div> : items.length ? <div className="admin-table-scroll"><table className="admin-table"><thead><tr>
@@ -110,7 +113,7 @@ export default function PostManager({ token }: { token: string }) {
           <button type="button" disabled={disabled} onClick={() => void applyAction([post], post.status === 'published' ? 'draft' : 'publish')}>{post.status === 'published' ? '下线' : '发布'}</button>
           <button type="button" disabled={disabled} onClick={() => void applyAction([post], 'delete')}>删除</button>
         </div></td>
-      </tr>)}</tbody></table></div> : <div className="admin-empty"><p>{search || categoryId || status !== 'all' ? '没有符合筛选条件的文章。' : '还没有文章，开始你的第一篇记录。'}</p><a className="btn" href="/admin/editor">写文章</a></div>}
+      </tr>)}</tbody></table></div> : <div className="admin-empty"><p>{search || categoryId || status !== 'all' || privateDocument !== 'all' ? '没有符合筛选条件的文章。' : '还没有文章，开始你的第一篇记录。'}</p><a className="btn" href="/admin/editor">写文章</a></div>}
       <div className="admin-pagination"><span>{result ? '共 ' + result.total + ' 篇文章' : '文章列表'}</span><div><select className="field !w-auto" aria-label="每页文章数" value={pageSize} disabled={busy} onChange={(event) => { setPageSize(Number(event.target.value)); setPage(1); }}><option value={10}>10 篇 / 页</option><option value={20}>20 篇 / 页</option><option value={50}>50 篇 / 页</option></select>
         <button type="button" className="btn" disabled={disabled || page <= 1} onClick={() => setPage((value) => value - 1)}>上一页</button><span>{page} / {result?.totalPages ?? 1}</span><button type="button" className="btn" disabled={disabled || page >= (result?.totalPages ?? 1)} onClick={() => setPage((value) => value + 1)}>下一页</button>
       </div></div>

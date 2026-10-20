@@ -89,12 +89,16 @@ admin.route('/', postActions);
 admin.get('/admin/posts', async (c) => {
   const query = c.req.query();
   const status = query.status === 'published' || query.status === 'draft' ? query.status : 'all';
+  if (query.privateDocument !== undefined && !['all', 'true', 'false'].includes(query.privateDocument)) {
+    return c.json(fail('VALIDATION_ERROR', '是否为私文档筛选值非法'), 422);
+  }
   const result = await listPosts(c.env.DB, {
     page: toInt(query.page, 1),
     pageSize: toInt(query.pageSize, 20),
     status,
     search: query.search?.slice(0, 200),
     categoryId: query.categoryId,
+    privateDocument: query.privateDocument === 'true' ? true : query.privateDocument === 'false' ? false : undefined,
     order: query.order === 'updated' ? 'updated' : undefined
   });
   return c.json(ok(result));

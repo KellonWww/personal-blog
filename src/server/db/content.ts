@@ -1,6 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import type { Category, PostDetail, PostSummary, SiteSummary, Tag } from '@/types/domain';
 import { placeholders, queryAll, queryOne } from './client';
+import { hasArchivePublicationTable } from './post-actions';
 
 interface PostRow {
   id: string;
@@ -33,6 +34,7 @@ interface TaxonomyRow {
 export interface PostQuery {
   search?: string;
   categoryId?: string;
+  privateDocument?: boolean;
   order?: 'updated';
   page?: number;
   pageSize?: number;
@@ -161,6 +163,16 @@ export async function listPosts(db: D1Database, query: PostQuery = {}): Promise<
   if (status !== 'all') {
     conditions.push('p.status = ?');
     params.push(status);
+  }
+  if (query.privateDocument !== undefined) {
+    const archiveSupport = await hasArchivePublicationTable(db);
+    // Keep the same binding semantics as the private archive publication guard, including tombstones.
+    if (archiveSupport) {
+      conditions.push((query.privateDocument ? 'EXISTS' : 'NOT EXISTS') +
+        ' (SELECT 1 FROM archive_publications a WHERE a.post_id = p.id)');
+    } else if (query.privateDocument) {
+      conditions.push('1 = 0');
+    }
   }
   if (query.search?.trim()) {
     conditions.push('instr(lower(p.title || char(32) || p.summary || char(32) || p.slug), lower(?)) > 0');
