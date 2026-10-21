@@ -8,8 +8,8 @@
    ------------------------------------------------------------------ */
 
 :root {
-  --radius-control: 10px;
-  --radius-panel: 18px;
+  --radius-control: 12px;
+  --radius-panel: 20px;
   --radius-pill: 999px;
 }
 
@@ -1051,7 +1051,7 @@ html[data-theme-transition]::view-transition-new(root) {
   .folio-actions .btn { border-radius: var(--radius-pill); padding: .9rem 1.6rem; gap: 1.7rem; font-size: .95rem; }
   .folio-about { display: inline-flex; gap: 1.5rem; align-items: center; border-bottom: 1px solid var(--line-strong); padding: .4rem 0; font-size: .85rem; }
   .folio-about:hover { color: var(--accent); border-color: var(--accent); }
-  .growth-art { min-width: 0; color: var(--ink); padding: 1.5rem; border-radius: 50% 50% 18px 18px; background-color: var(--paper); overflow: hidden; }
+  .growth-art { min-width: 0; color: var(--ink); padding: 1.5rem; border-radius: 50% 50% var(--radius-panel) var(--radius-panel); background-color: var(--paper); overflow: hidden; }
   .growth-svg { width: 100%; max-height: 520px; height: auto; display: block; }
   .growth-art figcaption { display: flex; justify-content: space-between; gap: .75rem; font-size: .72rem; color: var(--muted); padding: .4rem .5rem; }
   .growth-status { display: flex; align-items: center; gap: .45rem; white-space: nowrap; }
@@ -1094,7 +1094,7 @@ html[data-theme-transition]::view-transition-new(root) {
   .path-detail { display: block; margin-top: 2rem; font-size: .7rem; color: var(--muted); }
   .path-go { position: absolute; right: 1.7rem; top: 2rem; font-size: 1.5rem; color: var(--muted); transition: transform .3s var(--ease-out); }
   .path-card:hover .path-go, .path-card:focus-visible .path-go { color: var(--accent); }
-  .garden-invitation { background: var(--accent); color: var(--accent-ink); border-radius: 24px; padding: clamp(2rem, 5vw, 5rem); margin: 3rem 0 1rem; }
+  .garden-invitation { background: var(--accent); color: var(--accent-ink); border-radius: 28px; padding: clamp(2rem, 5vw, 5rem); margin: 3rem 0 1rem; }
   .garden-invitation > p { font-size: .9rem; }
   .garden-invitation h2 { font-size: clamp(2rem, 4.5vw, 5rem); max-width: 18ch; line-height: 1.4; font-weight: 500; letter-spacing: -.04em; margin: 2rem 0 3rem; overflow-wrap: anywhere; }
   .invitation-action { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; font-size: .85rem; }
@@ -1136,7 +1136,7 @@ html[data-theme-transition]::view-transition-new(root) {
   .folio-bio { font-size: .85rem; margin-top: 1.3rem; }
   .folio-actions { gap: 1.5rem; margin-top: 1.5rem; }
   .folio-actions .btn { padding: .75rem 1.2rem; font-size: .85rem; gap: 1rem; }
-  .growth-art { max-width: 100%; width: 100%; padding: 1rem 1.5rem; border-radius: 42% 42% 18px 18px; }
+  .growth-art { max-width: 100%; width: 100%; padding: 1rem 1.5rem; border-radius: 42% 42% var(--radius-panel) var(--radius-panel); }
   .growth-svg { max-height: 270px; }
   .growth-art figcaption { flex-direction: row; }
   .folio-colophon { align-items: start; flex-direction: column; gap: .7rem; }
@@ -1150,7 +1150,7 @@ html[data-theme-transition]::view-transition-new(root) {
   .path-card { padding: 1.5rem; }
   .path-icon { margin-bottom: 1.25rem; font-size: 2.5rem; }
   .path-tags, .path-detail { margin-top: 1rem; }
-  .garden-invitation { margin-top: 1.5rem; padding: 1.5rem; border-radius: 18px; }
+  .garden-invitation { margin-top: 1.5rem; padding: 1.5rem; border-radius: var(--radius-panel); }
   .garden-invitation h2 { margin: 1.5rem 0 2rem; font-size: 2.1rem; }
   .invitation-action { flex-direction: column; align-items: start; gap: 1rem; }
 }
