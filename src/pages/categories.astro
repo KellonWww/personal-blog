@@ -13,14 +13,17 @@ const categories = await listCategories(db);
   {categories.length === 0 ? (
     <p class="mt-4 py-12 text-sm text-muted">还没有分类。</p>
   ) : (
-    <div class="mt-6 border-t border-line">
-      {categories.map((category) => (
-        <a href={`/post?category=${category.slug}`} class="group flex items-baseline gap-4 border-b border-line py-5 transition-colors hover:text-accent">
-          <h2 class="text-lg font-semibold tracking-tight">{category.name}</h2>
-          <span class="font-mono text-xs text-muted tabular-nums">{category.postCount ?? 0} 篇</span>
-          <p class="ml-auto hidden max-w-md text-sm text-muted sm:block">{category.description || ''}</p>
-        </a>
-      ))}
+    <div class="catalog-layout">
+      <aside class="catalog-aside" data-motion><span class="catalog-symbol" aria-hidden="true">{'{ }'}</span><h2>知识有枝，<br />阅读有径。</h2><p>按主题整理的记录。选一条感兴趣的路径，往深处走走。</p><a href="/post" class="catalog-all">浏览全部文章</a></aside>
+      <div class="category-index">
+        {categories.map((category) => (
+          <a href={`/post?category=${category.slug}`} class="category-entry" data-motion>
+            <div class="category-entry-title"><h2>{category.name}</h2><span>{category.postCount ?? 0} 篇</span></div>
+            <p>{category.description || '这一枝的记录，慢慢积累。'}</p>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5" /></svg>
+          </a>
+        ))}
+      </div>
     </div>
   )}
 </BaseLayout>

@@ -9,8 +9,8 @@ import SiteSettings from './SiteSettings';
 import ArchiveManager from './ArchiveManager';
 
 const DESCRIPTIONS: Record<AdminView, string> = {
-  overview: '看看花园的近况，继续今天的写作。',
-  posts: '让每一篇文章有序生长，从草稿到发布。',
+  overview: '接着写，或整理已经写下的内容。',
+  posts: '查找、编辑与发布，管理每一篇文章。',
   archives: '只属于你的文本档案，与公开文章分开存放。',
   moderation: '回应读者，照看评论与留言。',
   settings: '维护站点资料，让花园保持自己的样子。'
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
     <AdminShell active={view} title={ADMIN_NAV.find((item) => item.key === view)?.label ?? '工作台'} description={DESCRIPTIONS[view]} userName={user?.displayName || user?.username} onNavigate={navigate} onLogout={loggingOut ? undefined : logout} actions={<>{view === 'archives' && <a href="/private-library" className="btn">前台阅读 ↗</a>}<a href="/admin/editor" className="btn btn-primary">＋ 写文章</a></>}>
       {error && <div role="alert" className="admin-notice"><span>{error}</span><button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>重试</button></div>}
       {loading ? <div role="status" className="admin-empty">正在加载管理空间…</div> : user && <>
-        {view === 'overview' && <AdminOverview userName={user.displayName || user.username} onNavigate={navigate} />}
+        {view === 'overview' && <AdminOverview onNavigate={navigate} />}
         {view === 'posts' && <PostManager token={user.csrfToken} />}
         {view === 'archives' && <ArchiveManager token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
         {view === 'moderation' && <ModerationManager token={user.csrfToken} />}

@@ -47,7 +47,7 @@ function pageHref(target: number): string {
       {result.items.length === 0 ? (
         <p class="py-12 text-sm text-muted">没有符合条件的文章。</p>
       ) : (
-        <div>{result.items.map((post) => <ArticleCard post={post} />)}</div>
+        <div>{result.items.map((post) => <ArticleCard post={post} motion />)}</div>
       )}
 
       {result.totalPages > 1 && (

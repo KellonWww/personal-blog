@@ -14,22 +14,19 @@ const max = Math.max(1, ...tags.map((tag) => tag.postCount ?? 0));
   {tags.length === 0 ? (
     <p class="mt-4 py-12 text-sm text-muted">还没有标签。</p>
   ) : (
-    <>
-
-      <div class="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-4">
+    <div class="catalog-layout tag-layout">
+      <aside class="catalog-aside" data-motion><span class="catalog-symbol" aria-hidden="true">#</span><h2>想法的交点。</h2><p>一个词，可能连着几种不同的好奇心。字号越大，留下的记录越多。</p><a href="/categories" class="catalog-all">按分类浏览</a></aside>
+      <div class="topic-field" aria-label="按文章数量呈现的标签">
         {tags.map((tag) => {
           const ratio = (tag.postCount ?? 0) / max;
-          const size = 0.88 + ratio * 0.7;
           return (
-            <a href={`/post?tag=${tag.slug}`} class="group inline-flex items-baseline gap-1.5 transition-colors hover:text-accent" style={`font-size:${size}rem`}>
-              <span class="text-muted group-hover:text-accent">#</span>
-              <span>{tag.name}</span>
-              <span class="font-mono text-[0.7rem] text-muted tabular-nums">{tag.postCount ?? 0}</span>
+            <a href={`/post?tag=${tag.slug}`} class="topic-link" data-weight={ratio > .5 ? 'major' : 'minor'} data-motion>
+              <span class="topic-hash" aria-hidden="true">#</span><span>{tag.name}</span><span class="topic-count">{tag.postCount ?? 0}<span class="sr-only"> 篇文章</span></span>
             </a>
           );
         })}
       </div>
-    </>
+    </div>
   )}
 </BaseLayout>
 

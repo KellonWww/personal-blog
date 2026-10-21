@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeading from '@/components/PageHeading.astro';
 
 const tools = [
   { name: '站内搜索', desc: '浏览器本地索引，支持标题、标签、摘要的多关键词匹配。', href: '/search', ready: true },
@@ -10,19 +11,14 @@ const tools = [
 ---
 
 <BaseLayout title="工具箱" description="常用工具入口" active="toolbox">
-  <div class="rule-label">工具箱</div>
-  <p class="mt-3 max-w-xl text-sm leading-relaxed text-muted">站点自带的实用入口。标注「规划中」的条目尚未实现。</p>
-
-  <div class="mt-8 border-t border-line">
+  <PageHeading title="手边的工具" description="写作、查找、整理。把日常用得上的入口，放在顺手的地方。" meta={`${tools.filter((tool) => tool.ready).length} 个可用入口`} />
+  <div class="tool-shelf">
     {tools.map((tool) => (
-      <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line py-5">
-        <h2 class="text-base font-semibold tracking-tight">{tool.name}</h2>
-        <span class:list={['font-mono text-[0.7rem]', tool.ready ? 'text-accent' : 'text-muted']}>{tool.ready ? '可用' : '规划中'}</span>
-        <p class="ml-auto max-w-lg text-sm leading-relaxed text-muted sm:text-right">{tool.desc}</p>
-        {tool.ready && tool.href && (
-          <a href={tool.href} class="border-b border-line-strong pb-0.5 text-sm text-muted transition-colors hover:border-accent hover:text-accent">进入</a>
-        )}
-      </div>
+      <section class="tool-entry" data-ready={tool.ready} data-motion>
+        <div class="tool-entry-heading"><h2>{tool.name}</h2><span>{tool.ready ? '可用' : '规划中'}</span></div>
+        <p>{tool.desc}</p>
+        {tool.ready && tool.href ? <a href={tool.href} class="tool-open">打开{tool.name}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" stroke-width="1.5" /></svg></a> : <span class="tool-planned">尚未实现，暂不开放</span>}
+      </section>
     ))}
   </div>
 </BaseLayout>

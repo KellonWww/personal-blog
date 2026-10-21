@@ -9,6 +9,10 @@ export default function GardenMotion() {
   useGSAP(() => {
     const garden = document.querySelector<HTMLElement>('[data-garden]');
     if (!garden) return;
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncState = () => { garden.dataset.motionState = preference.matches ? 'static' : 'active'; };
+    syncState();
+    preference.addEventListener('change', syncState);
     const media = gsap.matchMedia();
     media.add({
       motion: '(prefers-reduced-motion: no-preference)',
@@ -16,77 +20,82 @@ export default function GardenMotion() {
       pointer: '(hover: hover) and (pointer: fine)'
     }, (context) => {
       const { motion, desktop, pointer } = context.conditions ?? {};
-      garden.dataset.motionState = motion ? 'active' : 'static';
       if (!motion) return;
       const removers: Array<() => void> = [];
-      const art = garden.querySelector('.growth-svg');
-      const notes = garden.querySelector('.notes-section');
-      const index = garden.querySelector('[data-pin-index]');
-      if (desktop && notes && index) {
-        ScrollTrigger.create({ trigger: notes, start: 'top 112px',
-          end: () => '+=' + Math.max(0, notes.clientHeight - index.clientHeight),
-          pin: index, pinSpacing: false, invalidateOnRefresh: true });
+      // Transform the HTML wrapper, not each SVG leaf on every scroll frame.
+      const art = garden.querySelector<HTMLElement>('.growth-art');
+      if (art && desktop && pointer) {
+        gsap.to(art, { y: -24, scale: .97, ease: 'none',
+          scrollTrigger: { trigger: garden.querySelector('.folio-hero'), start: 'top top', end: 'bottom top', scrub: .35 } });
       }
-      if (art) {
-        gsap.fromTo(art, { scale: .8 }, { scale: 1, ease: 'none',
-          scrollTrigger: { trigger: art, start: 'top bottom', end: 'center center', scrub: .7 } });
-        gsap.to(art, { y: -40, opacity: .2, ease: 'none',
-          scrollTrigger: { trigger: '.folio-hero', start: 'top top', end: 'bottom top', scrub: .7 } });
-        gsap.to(garden.querySelectorAll('.growth-leaf'), { rotation: 5, transformOrigin: '240px 344px', stagger: .08, ease: 'none',
-          scrollTrigger: { trigger: '.folio-hero', start: 'top top', end: 'bottom top', scrub: 1 } });
-      }
-      garden.querySelectorAll('.notes-feed .article-row').forEach((row) => {
-        gsap.fromTo(row, { y: 22 }, { y: 0, ease: 'none',
-          scrollTrigger: { trigger: row, start: 'top 95%', end: 'top 75%', scrub: .4 } });
-      });
       const words = garden.querySelectorAll('[data-word-reveal] span');
-      if (words.length) gsap.fromTo(words, { opacity: .25 }, {
-        opacity: 1, stagger: .1, ease: 'none',
-        scrollTrigger: { trigger: '[data-word-reveal]', start: 'top 90%', end: 'top 55%', scrub: .6 }
+      if (words.length) gsap.fromTo(words, { opacity: .35 }, {
+        opacity: 1, duration: .45, stagger: { amount: .3 }, ease: 'power2.out',
+        scrollTrigger: { trigger: garden.querySelector('[data-word-reveal]'), start: 'top 90%', once: true }
       });
-      if (pointer) {
+      if (desktop && pointer) {
+        let activeReset: (() => void) | undefined;
         garden.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((element) => {
-          const xTo = gsap.quickTo(element, 'x', { duration: .35, ease: 'power3.out' });
-          const yTo = gsap.quickTo(element, 'y', { duration: .35, ease: 'power3.out' });
-          const move = (event: PointerEvent) => {
+          const xTo = gsap.quickTo(element, 'x', { duration: .28, ease: 'power3.out' });
+          const yTo = gsap.quickTo(element, 'y', { duration: .28, ease: 'power3.out' });
+          let center: { x: number; y: number } | undefined;
+          const enter = () => {
             const bounds = element.getBoundingClientRect();
-            xTo(gsap.utils.clamp(-6, 6, (event.clientX - bounds.left - bounds.width / 2) * .12));
-            yTo(gsap.utils.clamp(-4, 4, (event.clientY - bounds.top - bounds.height / 2) * .12));
+            center = {
+              x: bounds.left + bounds.width / 2 - Number(gsap.getProperty(element, 'x')),
+              y: bounds.top + bounds.height / 2 - Number(gsap.getProperty(element, 'y'))
+            };
+            activeReset = reset;
           };
-          const reset = () => { xTo(0); yTo(0); };
+          const move = (event: PointerEvent) => {
+            if (!center) return;
+            xTo(gsap.utils.clamp(-5, 5, (event.clientX - center.x) * .1));
+            yTo(gsap.utils.clamp(-3, 3, (event.clientY - center.y) * .1));
+          };
+          const reset = () => {
+            center = undefined;
+            xTo(0); yTo(0);
+            if (activeReset === reset) activeReset = undefined;
+          };
+          element.addEventListener('pointerenter', enter);
           element.addEventListener('pointermove', move);
           element.addEventListener('pointerleave', reset);
           element.addEventListener('blur', reset);
           removers.push(() => {
+            element.removeEventListener('pointerenter', enter);
             element.removeEventListener('pointermove', move);
             element.removeEventListener('pointerleave', reset);
             element.removeEventListener('blur', reset);
           });
         });
+        const resetPointer = () => activeReset?.();
+        window.addEventListener('scroll', resetPointer, { passive: true });
+        removers.push(() => window.removeEventListener('scroll', resetPointer));
       }
-      garden.querySelectorAll<HTMLElement>('.path-card').forEach((card) => {
-        const target = card.querySelector('.path-icon');
-        const hover = gsap.to(target, { rotation: -12, scale: 1.08, duration: .35, ease: 'power3.out', paused: true });
-        const enter = () => { hover.play(); };
-        const leave = () => { hover.reverse(); };
-        card.addEventListener('pointerenter', enter); card.addEventListener('pointerleave', leave);
-        card.addEventListener('focus', enter); card.addEventListener('blur', leave);
-        removers.push(() => {
-          card.removeEventListener('pointerenter', enter); card.removeEventListener('pointerleave', leave);
-          card.removeEventListener('focus', enter); card.removeEventListener('blur', leave);
+      // ScrollTrigger already refreshes on load/resize; coalesce late image loads.
+      let refreshFrame = 0;
+      const refresh = () => {
+        if (!refreshFrame) refreshFrame = requestAnimationFrame(() => {
+          refreshFrame = 0;
+          ScrollTrigger.refresh();
         });
-      });
-      const refresh = () => ScrollTrigger.refresh();
+      };
       garden.querySelectorAll('img').forEach(image => {
         if (!image.complete) {
           image.addEventListener('load', refresh, { once: true });
           removers.push(() => image.removeEventListener('load', refresh));
         }
       });
-      refresh();
-      return () => removers.forEach(remove => remove());
+      return () => {
+        cancelAnimationFrame(refreshFrame);
+        removers.forEach(remove => remove());
+      };
     });
-    return () => { media.revert(); delete garden.dataset.motionState; };
+    return () => {
+      media.revert();
+      preference.removeEventListener('change', syncState);
+      delete garden.dataset.motionState;
+    };
   }, []);
   return null;
 }

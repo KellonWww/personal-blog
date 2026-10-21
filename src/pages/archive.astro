@@ -16,16 +16,16 @@ const groups = groupByYear(posts);
   {groups.length === 0 ? (
     <p class="mt-4 py-12 text-sm text-muted">还没有可归档的文章。</p>
   ) : (
-    <div class="mt-8 space-y-12">
+    <div class="archive-timeline">
       {groups.map((group) => (
-        <section class="grid gap-3 sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-6">
-          <h2 class="font-mono text-lg font-semibold tabular-nums text-accent">{group.year}</h2>
+        <section class="timeline-year">
+          <div class="timeline-year-label" data-motion><h2>{group.year}</h2><span>{group.posts.length} 篇记录</span></div>
           <ul>
             {group.posts.map((post) => (
-              <li class="flex flex-wrap items-baseline gap-x-3 border-b border-line py-3 last:border-b-0">
+              <li class="timeline-entry" data-motion>
                 <time class="font-mono text-xs text-muted tabular-nums">{formatDate(post.publishedAt ?? post.createdAt)}</time>
                 <a href={`/post/${post.slug}`} class="font-medium transition-colors hover:text-accent">{post.title}</a>
-                <span class="ml-auto font-mono text-xs text-muted tabular-nums">{post.commentCount}</span>
+                <span class="timeline-comments" aria-label={`${post.commentCount} 条评论`}>{post.commentCount}</span>
               </li>
             ))}
           </ul>

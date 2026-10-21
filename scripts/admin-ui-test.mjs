@@ -103,7 +103,7 @@ await context.route('**/api/**', async (route) => {
 try {
   await page.goto(`${BASE}/admin`);
   await page.getByRole('heading', { name: '最近编辑' }).waitFor();
-  assert.equal(await page.locator('.admin-metric').count(), 4);
+  assert.equal(await page.locator('.admin-census-row').count(), 4);
   log('工作台统计与最近编辑');
   const evidence = join(homedir(), '.agents', 'evidence', 'personal-blog');
   await mkdir(evidence, { recursive: true });

@@ -26,7 +26,7 @@ const motto = profile.motto || '写下所学，留下所想。';
 <BaseLayout title={profile.name} description={profile.bio} active="home">
   <div class="living-garden" data-garden>
     <section class="folio-hero" aria-labelledby="garden-title">
-      <div class="folio-copy">
+      <div class="folio-copy" data-motion>
         <p class="folio-greeting">你好，我是 Kale。这里存放我的好奇心。</p>
         <h1 id="garden-title">{hasKaleName ? <><span class="folio-name">Kale<span class="folio-period">.</span></span><span class="folio-subtitle">的数字花园<span class="folio-avatar">{profile.avatar && <img src={profile.avatar} alt="Kale 的 GitHub 头像" width={72} height={72} />}</span></span></> : profile.name}</h1>
         <p class="folio-bio">{profile.bio}</p>
@@ -59,14 +59,14 @@ const motto = profile.motto || '写下所学，留下所想。';
     </div>
 
     <section class="notes-section" id="latest" aria-labelledby="notes-title">
-      <div class="notes-index" data-pin-index>
+      <div class="notes-index">
         <p class="notes-intro">最近，正在记录</p>
         <h2 id="notes-title">新的<br /><em>枝叶。</em></h2>
         <p class="notes-description">技术里的细节，生活里的片刻。<br />慢慢积累，偶尔回看。</p>
         <a href="/archive" class="folio-about">按时间翻阅 <span aria-hidden="true">↗</span></a>
       </div>
       <div class="notes-feed">
-        {latest.items.length === 0 ? <div class="empty-state"><h3>第一篇，还在酝酿中。</h3><a href="/guestbook" class="text-link">去留言</a></div> : latest.items.map((post, index) => <ArticleCard post={post} featured={index === 0} />)}
+        {latest.items.length === 0 ? <div class="empty-state"><h3>第一篇，还在酝酿中。</h3><a href="/guestbook" class="text-link">去留言</a></div> : latest.items.map((post, index) => <ArticleCard post={post} featured={index === 0} motion />)}
         <a href="/post" class="notes-all" data-magnetic><span>翻阅全部文章</span><span class="font-mono">{formatNumber(summary.postCount)} <span aria-hidden="true">↗</span></span></a>
       </div>
     </section>

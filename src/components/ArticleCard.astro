@@ -7,15 +7,16 @@ interface Props {
   post: PostSummary;
   order?: number;
   featured?: boolean;
+  motion?: boolean;
 }
 
-const { post, order, featured = false } = Astro.props;
+const { post, order, featured = false, motion = false } = Astro.props;
 const date = formatDate(post.publishedAt ?? post.createdAt);
 const index = typeof order === 'number' ? String(order).padStart(2, '0') : null;
 const href = `/post/${post.slug}`;
 ---
 
-<article class:list={["article-row group", { "article-featured": featured }]}>
+<article data-motion={motion || undefined} class:list={["article-row group", { "article-featured": featured }]}>
   <div class="index-rail">
     {index && <span class="article-number">{index}</span>}
     {featured && <span class="article-fresh">最近更新</span>}

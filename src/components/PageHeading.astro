@@ -6,7 +6,16 @@ interface Props {
 }
 const { title, description, meta } = Astro.props;
 ---
-<header class="page-heading">
-  <div class="page-heading-line"><h1>{title}</h1>{meta && <span>{meta}</span>}</div>
-  {description && <p>{description}</p>}
+<header class="page-heading" data-motion>
+  <div class="page-heading-copy">
+    <div class="page-heading-line"><h1>{title}</h1>{meta && <span>{meta}</span>}</div>
+    {description && <p>{description}</p>}
+  </div>
+  <svg class="page-heading-sprout" viewBox="0 0 160 120" fill="none" aria-hidden="true">
+    <circle cx="80" cy="60" r="49" stroke="currentColor" stroke-dasharray="2 7" />
+    <path class="sprout-stem" d="M80 105V36M80 81 51 52M80 65l30-31M57 105h46" stroke="currentColor" stroke-width="1.5" />
+    <path d="M80 82C48 83 29 64 32 36c31-1 51 18 48 46Z" fill="var(--accent)" />
+    <path d="M80 66c-3-30 17-49 48-48 3 30-16 49-48 48Z" fill="currentColor" />
+    <path d="m80 82-32-31m32 15 32-32" stroke="var(--surface)" stroke-width="1.5" />
+  </svg>
 </header>

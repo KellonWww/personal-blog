@@ -48,6 +48,15 @@ npm run dev                 # http://localhost:4321
 npm run smoke
 ```
 
+视觉与动效回归（需先起 dev，后台仅拦截只读请求，不修改数据）：
+
+```bash
+node scripts/ui-motion-test.mjs [playwright模块路径] [浏览器channel]
+```
+
+覆盖前台内页与后台的双主题、320–1440px 布局、键盘导航、减少动态效果和无 JavaScript 阅读。
+设计规则见 `DESIGN.md`；截图与运行结果保存在仓库外 `~/.agents/evidence/personal-blog/`。
+
 ### 本地登录
 
 本地通过 `POST /api/auth/dev-login` 创建管理员会话（仅 `ENVIRONMENT=development && AUTH_DEV_MODE=true` 时可用）。
@@ -119,3 +128,16 @@ wrangler deploy
 
 - 本仓库按要求**未提交、未推送**任何 Git 记录。
 - 娱乐/工具箱当前为导航占位，未实现具体内容模型。
+
+## 后台 UI 回归
+
+后台采用编辑室布局，提供真实最近编辑入口、文章目录、站点账目和审核待办；沿用前台双主题。
+启动本地开发服务后，在另一个终端执行（需环境中已有 Playwright 和浏览器，不会新增项目依赖）：
+
+```bash
+node scripts/admin-redesign-test.mjs /absolute/path/to/playwright/index.mjs msedge
+```
+
+可省略模块路径以使用环境中的 `playwright`；不指定浏览器通道时使用 Playwright Chromium。
+覆盖双主题、320–1440px、五个后台视图、文章编辑器、筛选/选择、未保存保护、键盘导航、空态/重试及减少动态效果。
+所有 API 都由只读 mock 拦截，不登录真实账号、不验证或触发真实保存/发布/审核。截图和结果保存在仓库外的 `~/.agents/evidence/personal-blog/`。
