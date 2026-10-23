@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import TimeConverter from '@/components/toolbox/TimeConverter';
+---
+<ToolLayout title="时间转换" description="在时间戳和日期之间来回换算，也把不同时区的时间对齐。" active="/toolbox/time">
+  <TimeConverter client:load />
+</ToolLayout>

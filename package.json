@@ -16,6 +16,7 @@
     "db:local:seed": "wrangler d1 execute personal-blog-db --local --file=./migrations/0002_seed.sql",
     "db:local:init": "npm run db:local:migrate && npm run db:local:seed",
     "smoke": "node scripts/smoke.mjs",
+    "test:toolbox": "node --test scripts/toolbox.test.mjs",
     "archives:import": "node scripts/import-archives.mjs",
     "deploy": "npm run build && wrangler deploy",
     "predev": "node scripts/sync-mermaid.mjs",
@@ -39,8 +40,10 @@
     "marked": "^18.1.0",
     "mermaid": "^11.17.2",
     "opencc-js": "^1.4.2",
+    "prettier": "^3.9.10",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "sql-formatter": "^15.9.0",
     "tailwindcss": "^4.3.3",
     "zod": "^4.6.5"
   },

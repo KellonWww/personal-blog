@@ -1,0 +1,17 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import PageHeading from '@/components/PageHeading.astro';
+import '@/styles/toolbox.css';
+import ToolIcon from '@/components/toolbox/ToolIcon.astro';
+import { tools } from '@/lib/tool-definitions';
+interface Props { title: string; description: string; active: string }
+const { title, description, active } = Astro.props;
+
+---
+<BaseLayout title={title} description={description} active="toolbox">
+  <a href="/toolbox" class="tool-back">← 返回工具箱</a>
+  <PageHeading title={title} description={description} meta="浏览器本地处理 · 不上传输入内容" />
+  <nav class="tool-nav" aria-label="切换工具">{tools.map((tool) => <a href={tool.href} aria-current={active === tool.href ? 'page' : undefined}><ToolIcon name={tool.icon} size="1.1rem" />{tool.name}</a>)}</nav>
+  <noscript><p class="tool-error">此工具需要 JavaScript 才能在浏览器中处理内容，请启用后重试。输入不会上传。</p></noscript>
+  <slot />
+</BaseLayout>

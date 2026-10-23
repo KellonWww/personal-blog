@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import CodecWorkbench from '@/components/toolbox/CodecWorkbench';
+---
+<ToolLayout title="编解码工作台" description="Base64、URL 与 Unicode 文本编解码，支持中文与 emoji。" active="/toolbox/codec">
+  <CodecWorkbench client:load />
+</ToolLayout>

@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import TextWorkbench from '@/components/toolbox/TextWorkbench';
+---
+<ToolLayout title="文本处理" description="按行去重、排序、去空行、修剪空白、大小写转换与添加前后缀。" active="/toolbox/text">
+  <TextWorkbench client:load />
+</ToolLayout>

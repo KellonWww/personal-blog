@@ -127,7 +127,7 @@ wrangler deploy
 ## 说明
 
 - 本仓库按要求**未提交、未推送**任何 Git 记录。
-- 娱乐/工具箱当前为导航占位，未实现具体内容模型。
+- 娱乐页保留导航；工具箱提供 文本格式化、时间转换、文本 Diff、编解码、文本处理和正则测试；Diff 支持在可编辑文本框内高亮新增、删除及修改片段，编辑后重新对比。输入仅在浏览器内处理，不上传、不持久化。
 
 ## 后台 UI 回归
 
@@ -141,3 +141,29 @@ node scripts/admin-redesign-test.mjs /absolute/path/to/playwright/index.mjs msed
 可省略模块路径以使用环境中的 `playwright`；不指定浏览器通道时使用 Playwright Chromium。
 覆盖双主题、320–1440px、五个后台视图、文章编辑器、筛选/选择、未保存保护、键盘导航、空态/重试及减少动态效果。
 所有 API 都由只读 mock 拦截，不登录真实账号、不验证或触发真实保存/发布/审核。截图和结果保存在仓库外的 `~/.agents/evidence/personal-blog/`。
+
+## 工具箱
+
+| 路由 | 功能 |
+|------|------|
+| `/toolbox/format` | JSON、SQL、HTML、CSS、JavaScript、TypeScript、Markdown、YAML 格式化；JSON 另支持校验 / 压缩 / 字段路径；输入 200,000、输出 1,000,000 字符 |
+| `/toolbox/json` | 旧入口，301 跳转至文本格式化 |
+| `/toolbox/time` | 秒 / 毫秒时间戳双向转换，上海 / UTC / 东京 / 纽约 / 伦敦时区；校验夏令时空缺与重复 |
+| `/toolbox/diff` | 逐行对比、行号、忽略空白、交换左右、复制结果；每侧最多 1,000 行 / 100,000 字符 |
+| `/toolbox/codec` | Base64（UTF-8）、URL 参数值、Unicode 转义编解码；输入 100,000 / 输出 500,000 字符 |
+| `/toolbox/text` | 按行去重、自然排序、去空行、修剪、大/小写、前后缀；支持结果继续处理；输入 100,000 / 输出 500,000 字符 |
+| `/toolbox/regex` | JavaScript 正则匹配高亮、捕获组、替换预览；文本 20,000 字符、表达式/模板各 2,000 字符、替换结果 200,000 字符 |
+
+工具无需登录，需要 JavaScript；所有计算在本地执行，不向接口发送输入，也不写入浏览器存储。
+编解码不是加密；Base64 只解码 UTF-8 文本；URL 按参数值处理，`+` 不转换为空格。
+Unicode 支持 `\uXXXX` / `\u{1F600}`，编码按 UTF-16 单元输出；文本去重区分大小写/空格，按行操作统一换行符。
+正则支持 `g i m s u y`，替换遵循 JavaScript 引用规则；独立 Web Worker 运行，2 秒超时终止。
+正则最多展示 500 处匹配（超限不生成替换结果），每处最多展示 50 个捕获组；位置是从 0 开始的 UTF-16 索引，零长度匹配显示竖线。
+文本格式化可选 2 / 4 空格缩进；SQL 支持标准 SQL、MySQL/MariaDB、PostgreSQL、SQLite、SQL Server 方言，不支持存储过程或自定义 DELIMITER。
+SQL 仅排版、不执行、不连接数据库，不代替数据库语法校验；非 JSON 不提供压缩或严格校验按钮。
+格式化器按需从本站加载，独立 Web Worker 处理，15 秒超时终止，可取消；修改输入、类型、方言或缩进会清除旧结果。
+HTML / Markdown 内嵌脚本、样式和代码块保持原样，输入仅作为文本展示，不渲染执行。
+JSON 大整数需使用字符串；时间戳自动识别是启发式规则，边界日期请手动指定单位。
+核心回归：`npm run test:toolbox`（Node.js 22.18+，直接执行 TypeScript）；不需要数据库或网络。
+
+浏览器回归（先启动 dev）：`node scripts/toolbox-ui-test.mjs [playwright模块路径] [浏览器channel]`。覆盖双主题 / 320–1440px / 复制与失败反馈 / 无 JS 提示；截图保存在仓库外 `~/.agents/evidence/personal-blog/`。

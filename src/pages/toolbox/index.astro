@@ -1,21 +1,18 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
+import ToolIcon from '@/components/toolbox/ToolIcon.astro';
+import { tools } from '@/lib/tool-definitions';
 
-const tools = [
-  { name: '站内搜索', desc: '浏览器本地索引，支持标题、标签、摘要的多关键词匹配。', href: '/search', ready: true },
-  { name: 'Markdown 编辑器', desc: '后台文章编辑已内置 Markdown 编写与实时预览。', href: '/admin/editor', ready: true },
-  { name: '归档时间轴', desc: '按年份浏览全部文章。', href: '/archive', ready: true },
-  { name: '在线小工具集合', desc: 'JSON 格式化、正则测试、时间戳转换等，规划中，尚未实现。', href: '', ready: false }
-];
+
 ---
 
 <BaseLayout title="工具箱" description="常用工具入口" active="toolbox">
-  <PageHeading title="手边的工具" description="写作、查找、整理。把日常用得上的入口，放在顺手的地方。" meta={`${tools.filter((tool) => tool.ready).length} 个可用入口`} />
+  <PageHeading title="手边的工具" description="写作、查找、整理。把日常用得上的入口，放在顺手的地方。" />
   <div class="tool-shelf">
     {tools.map((tool) => (
       <section class="tool-entry" data-ready={tool.ready} data-motion>
-        <div class="tool-entry-heading"><h2>{tool.name}</h2><span>{tool.ready ? '可用' : '规划中'}</span></div>
+        <div class="tool-entry-heading"><h2><ToolIcon name={tool.icon} size="1.15em" />{tool.name}</h2><span>{tool.ready ? '可用' : '规划中'}</span></div>
         <p>{tool.desc}</p>
         {tool.ready && tool.href ? <a href={tool.href} class="tool-open">打开{tool.name}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" stroke-width="1.5" /></svg></a> : <span class="tool-planned">尚未实现，暂不开放</span>}
       </section>
@@ -24,3 +21,7 @@ const tools = [
 </BaseLayout>
 
 <!-- avoid-ai-design-ignore-file: K7 — 键盘焦点样式为全局 :focus-visible（globals.css） -->
+
+<style>
+  .tool-entry-heading h2 { display: flex; align-items: center; gap: .65rem; }
+</style>

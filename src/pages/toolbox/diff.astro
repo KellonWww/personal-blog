@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import TextDiff from '@/components/toolbox/TextDiff';
+---
+<ToolLayout title="文本 Diff" description="两段文本并排放，增删改动逐行看。适合核对配置、接口回传和文章草稿。" active="/toolbox/diff">
+  <TextDiff client:load />
+</ToolLayout>
