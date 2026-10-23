@@ -24,7 +24,7 @@ export const privateLibrary: MiddlewareHandler = async (context, next) => {
   } catch {
     pathname = context.url.pathname;
   }
-  if (pathname !== '/private-library' && !pathname.startsWith('/private-library/')) {
+  if (pathname !== '/private' && !pathname.startsWith('/private/')) {
     return next();
   }
   try {

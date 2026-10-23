@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import JwtWorkbench from '@/components/toolbox/JwtWorkbench';
+---
+<ToolLayout title="JWT 解析" description="读取令牌内容与时间声明，不上传令牌，不验证签名。" active="/toolbox/jwt">
+  <JwtWorkbench client:load />
+</ToolLayout>

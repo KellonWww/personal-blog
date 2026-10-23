@@ -127,7 +127,7 @@ wrangler deploy
 ## 说明
 
 - 本仓库按要求**未提交、未推送**任何 Git 记录。
-- 娱乐页保留导航；工具箱提供 文本格式化、时间转换、文本 Diff、编解码、文本处理和正则测试；Diff 支持在可编辑文本框内高亮新增、删除及修改片段，编辑后重新对比。输入仅在浏览器内处理，不上传、不持久化。
+- 娱乐页保留导航；工具箱提供 文本格式化、时间转换、文本 Diff、编解码、文本处理、正则测试、二维码、JWT 解析、URL 参数编辑和安全生成器；Diff 支持在可编辑文本框内高亮新增、删除及修改片段，编辑后重新对比。输入仅在浏览器内处理，不上传、不持久化。
 
 ## 后台 UI 回归
 
@@ -153,6 +153,10 @@ node scripts/admin-redesign-test.mjs /absolute/path/to/playwright/index.mjs msed
 | `/toolbox/codec` | Base64（UTF-8）、URL 参数值、Unicode 转义编解码；输入 100,000 / 输出 500,000 字符 |
 | `/toolbox/text` | 按行去重、自然排序、去空行、修剪、大/小写、前后缀；支持结果继续处理；输入 100,000 / 输出 500,000 字符 |
 | `/toolbox/regex` | JavaScript 正则匹配高亮、捕获组、替换预览；文本 20,000 字符、表达式/模板各 2,000 字符、替换结果 200,000 字符 |
+| `/toolbox/qr` | 二维码实时预览，L/M/Q/H 纠错，512–2048px PNG / SVG 下载；最多 1,200 UTF-8 字节 |
+| `/toolbox/jwt` | 三段 JWT / Bearer 解析，Header、Payload、时间声明；最多 32,768 字符，只解析不验签 |
+| `/toolbox/url` | http(s) URL 拆解、参数编辑、重复参数、追踪参数移除；最多 20,000 字符 / 200 组参数 |
+| `/toolbox/generator` | UUID v4（1–50 条）、安全随机密码（8–128 位 / 1–20 条）、文本 / 文件 SHA-256；文本 1,000,000 字符 / 文件 20 MiB |
 
 工具无需登录，需要 JavaScript；所有计算在本地执行，不向接口发送输入，也不写入浏览器存储。
 编解码不是加密；Base64 只解码 UTF-8 文本；URL 按参数值处理，`+` 不转换为空格。
@@ -167,3 +171,7 @@ JSON 大整数需使用字符串；时间戳自动识别是启发式规则，边
 核心回归：`npm run test:toolbox`（Node.js 22.18+，直接执行 TypeScript）；不需要数据库或网络。
 
 浏览器回归（先启动 dev）：`node scripts/toolbox-ui-test.mjs [playwright模块路径] [浏览器channel]`。覆盖双主题 / 320–1440px / 复制与失败反馈 / 无 JS 提示；截图保存在仓库外 `~/.agents/evidence/personal-blog/`。
+
+新增工具说明：二维码库按需从本站加载，保留黑白与四模块静区；只生成，不识别图片。JWT 不验证签名，不用于身份或权限判断，不支持加密 JWE。
+URL 不访问目标站点；查询参数按 URLSearchParams 规则重组（空格为 +），修改签名 URL 可能使其失效。
+UUID / 密码使用浏览器安全随机源；每个密码包含所有选中的字符类。SHA-256 仅用于摘要校验，不是加密或密码存储方案；安全生成器需要 HTTPS 或 localhost。

@@ -1,6 +1,6 @@
 .tool-back { display: inline-block; margin-bottom: 1rem; color: var(--muted); font-size: .85rem; }
 .tool-back:hover { color: var(--accent); }
-.tool-nav { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin: 1.5rem 0 2rem; border-bottom: 1px solid var(--line); }
+.tool-nav { position: relative; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin: 1.5rem 0 2rem; border-bottom: 1px solid var(--line); }
 .tool-nav a { display: inline-flex; align-items: center; gap: .45rem; padding: .6rem 0; color: var(--muted); border-bottom: 2px solid transparent; }
 .tool-nav a[aria-current="page"] { color: var(--ink); border-color: var(--accent); }
 .tool-workspace { margin-bottom: 4rem; }
@@ -118,4 +118,68 @@
   .tool-transform-columns { grid-template-columns: minmax(0, 1fr); }
   .tool-transform-actions { flex-direction: row; flex-wrap: wrap; }
   .tool-transform-actions .btn { flex: 1; }
+}
+
+
+/* New workbenches share the site's quiet rules, accent and local-only controls. */
+.tool-code-medium { min-height: 14rem; }
+.tool-safety-note { padding: 1rem 0 1rem 1rem; border-left: 2px solid var(--accent); margin: 0 0 1.5rem; color: var(--muted); font-size: .85rem; line-height: 1.8; }
+.tool-safety-note strong { color: var(--ink); font-weight: 500; }
+.tool-empty-state { min-height: 20rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; padding: 1.5rem; text-align: center; border: 1px dashed var(--line-strong); color: var(--muted); }
+.tool-empty-state p { color: var(--ink); font-size: 1rem; }
+.tool-empty-state small { max-width: 28ch; font-size: .8rem; line-height: 1.8; }
+.tool-empty-symbol { font-family: var(--font-mono); font-size: 2.5rem; color: var(--accent); }
+.tool-jwt-result { min-height: 24rem; max-height: 35rem; overflow: auto; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--paper); }
+.tool-result-caption { padding: .65rem 1rem; border-bottom: 1px solid var(--line); color: var(--accent); font-size: .75rem; }
+.tool-jwt-result pre { padding: 1rem; font: .85rem/1.8 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tool-detail-section { margin-top: 2.5rem; padding-top: .5rem; border-top: 1px solid var(--line); }
+.tool-url-parts { display: grid; grid-template-columns: .6fr 1.2fr 1.2fr 1fr; gap: 1.5rem; margin: 1.25rem 0 2rem; }
+.tool-url-parts dt { color: var(--muted); font-size: .75rem; margin-bottom: .5rem; }
+.tool-url-parts dd { font-size: .9rem; overflow-wrap: anywhere; }
+.tool-param-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.6fr) auto; gap: .75rem; align-items: center; padding: .6rem 0; border-bottom: 1px solid var(--line); }
+.tool-param-equals { color: var(--muted); }
+.tool-param-row .btn { min-height: 44px; }
+.tool-add-row { margin-top: 1rem; min-height: 44px; }
+.tool-mode-switch { display: flex; flex-wrap: wrap; gap: .25rem 1.5rem; margin: 0 0 1.5rem; border-bottom: 1px solid var(--line); }
+.tool-mode-switch button { min-height: 48px; padding: .5rem .1rem; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; transition: color .16s, border-color .16s; }
+.tool-mode-switch button[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+.tool-mode-switch button:hover { color: var(--accent); }
+.tool-mode-switch-small { margin: 0; font-size: .85rem; }
+.tool-generator-settings { display: flex; flex-direction: column; gap: 1.1rem; }
+.tool-generator-output { min-height: 24rem; }
+.tool-setting-value { color: var(--accent); font-weight: 500; }
+.tool-workspace input.tool-range { width: 100%; min-height: 44px; padding: 0; border: 0; background: transparent; accent-color: var(--accent); cursor: pointer; }
+.tool-character-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem 1rem; font-size: .85rem; }
+.tool-character-options .tool-checkbox:last-child { grid-column: 1 / -1; }
+.tool-file-picker { min-height: 14rem; display: flex; flex-direction: column; justify-content: center; padding: 1.25rem; border: 1px dashed var(--line-strong); background: var(--paper); }
+.tool-file-picker input::file-selector-button { margin-right: .75rem; padding: .45rem .75rem; border: 1px solid var(--line-strong); border-radius: var(--radius-control); background: var(--paper-soft); color: var(--ink); cursor: pointer; }
+.tool-qr-columns { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 5rem); }
+.tool-qr-settings { min-width: 0; }
+.tool-settings-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; font-size: .85rem; }
+.tool-qr-preview { min-width: 0; }
+.tool-qr-preview h2 { font-size: 1rem; }
+.tool-qr-stage { display: flex; justify-content: center; align-items: center; min-height: 20rem; margin: .6rem 0 1.25rem; padding: 1rem; background: var(--paper-soft); border: 1px solid var(--line); }
+.tool-qr-stage img { display: block; width: min(100%, 18rem); height: auto; aspect-ratio: 1; image-rendering: pixelated; }
+.tool-qr-stage .tool-empty-state { border: 0; min-height: 18rem; }
+.tool-qr-stage .tool-empty-state > svg { margin-bottom: .5rem; color: var(--accent); }
+.tool-qr-downloads { display: flex; flex-wrap: wrap; gap: .75rem; }
+.tool-qr-downloads .btn { min-height: 44px; }
+@media (prefers-reduced-motion: no-preference) {
+  .tool-reveal { animation: tool-reveal .2s ease-out both; }
+  @keyframes tool-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+}
+@media (max-width: 767px) {
+  .tool-qr-columns { grid-template-columns: minmax(0, 1fr); }
+  .tool-url-parts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+}
+@media (max-width: 399px) {
+  .tool-param-row { grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }
+  .tool-param-row > .tool-field:first-child { grid-column: 1 / -1; }
+  .tool-param-equals { display: none; }
+  .tool-settings-row { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 767px) {
+  .tool-nav { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; gap: 1.25rem; padding-bottom: .25rem; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+  .tool-nav a { flex: 0 0 auto; }
 }

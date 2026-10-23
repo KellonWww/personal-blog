@@ -19,12 +19,12 @@ const totalPages = Math.max(1, Math.ceil((result?.total ?? 0) / 10));
 if (result && result.page > totalPages && totalPages <= 10000) {
   const next = new URLSearchParams(params);
   next.set('page', String(totalPages));
-  return Astro.redirect('/private-library?' + next);
+  return Astro.redirect('/private?' + next);
 }
 function pageHref(page: number): string {
   const next = new URLSearchParams(params);
   next.set('page', String(page));
-  return '/private-library?' + next;
+  return '/private?' + next;
 }
 ---
 
@@ -33,11 +33,11 @@ function pageHref(page: number): string {
   <PageHeading title="私人文库" description="把留给自己的文字，放在这里慢慢读。" meta={result ? result.total + ' 份文档 · 仅自己可见' : '仅自己可见'} />
   <div class="mt-6 grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1fr)_15rem]">
     <section aria-label="私人文档">
-      <form class="flex flex-wrap items-center gap-2 border-b border-line pb-5" method="get" role="search" action="/private-library">
+      <form class="flex flex-wrap items-center gap-2 border-b border-line pb-5" method="get" role="search" action="/private">
         <label class="sr-only" for="private-query">搜索私人文档</label>
         <input id="private-query" class="field min-w-0 flex-1" name="q" type="search" value={params.get('q') ?? ''} maxlength="200" placeholder="搜索标题、正文或代码…" />
         <button class="btn" type="submit">搜索</button>
-        {params.get('q') && <a class="btn btn-ghost" href="/private-library">重置</a>}
+        {params.get('q') && <a class="btn btn-ghost" href="/private">重置</a>}
       </form>
       {validationError && <p role="alert" class="border-b border-line py-5 text-sm text-muted">{validationError}。请调整搜索条件后重试。</p>}
       {result && (result.items.length ? <div>{result.items.map((item) => (
@@ -47,18 +47,18 @@ function pageHref(page: number): string {
             <p class="text-muted">私人文档</p>
           </div>
           <div class="min-w-0">
-            <h2 class="article-title"><a href={'/private-library/' + encodeURIComponent(item.id)} class="transition-colors">{item.title}</a></h2>
+            <h2 class="article-title"><a href={'/private/' + encodeURIComponent(item.id)} class="transition-colors">{item.title}</a></h2>
             {item.snippet && <p class="article-summary line-clamp-2">{item.snippet}</p>}
             <div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted">
               <span>{item.sourceName}</span>
               {item.conflictState === 'pending' && <span>有来源更新待核对 · 当前显示已保存版本</span>}
-              <a class="ml-auto hover:text-accent" href={'/private-library/' + encodeURIComponent(item.id)}>阅读全文</a>
+              <a class="ml-auto hover:text-accent" href={'/private/' + encodeURIComponent(item.id)}>阅读全文</a>
             </div>
           </div>
         </article>
       ))}</div> : <div class="border-b border-line py-12 text-sm text-muted">
         <p>{search ? '没有找到匹配的文档，换个关键词试试。' : '文库还是空的，可先在后台把文章转存为私人档案。'}</p>
-        <a class="mt-4 inline-block text-accent" href={search ? '/private-library' : '/admin?view=archives'}>{search ? '查看全部文档' : '前往私人档案'}</a>
+        <a class="mt-4 inline-block text-accent" href={search ? '/private' : '/admin?view=archives'}>{search ? '查看全部文档' : '前往私人档案'}</a>
       </div>)}
       {result && totalPages > 1 && <nav class="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm" aria-label="私人文库分页">
         {result.page > 1 && <a class="btn" href={pageHref(result.page - 1)}>上一页</a>}

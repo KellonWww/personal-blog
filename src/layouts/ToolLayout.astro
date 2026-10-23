@@ -15,3 +15,11 @@ const { title, description, active } = Astro.props;
   <noscript><p class="tool-error">此工具需要 JavaScript 才能在浏览器中处理内容，请启用后重试。输入不会上传。</p></noscript>
   <slot />
 </BaseLayout>
+
+<script>
+  const navigation = document.querySelector<HTMLElement>('.tool-nav');
+  const current = navigation?.querySelector<HTMLElement>('[aria-current="page"]');
+  if (navigation && current && navigation.scrollWidth > navigation.clientWidth) {
+    navigation.scrollLeft = current.offsetLeft - (navigation.clientWidth - current.clientWidth) / 2;
+  }
+</script>

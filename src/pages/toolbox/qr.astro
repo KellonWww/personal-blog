@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import QrWorkbench from '@/components/toolbox/QrWorkbench';
+---
+<ToolLayout title="二维码生成" description="把文字或网址变成二维码，实时预览，下载 PNG 或 SVG。" active="/toolbox/qr">
+  <QrWorkbench client:load />
+</ToolLayout>

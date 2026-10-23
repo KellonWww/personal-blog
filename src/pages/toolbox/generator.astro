@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import GeneratorWorkbench from '@/components/toolbox/GeneratorWorkbench';
+---
+<ToolLayout title="安全生成器" description="生成 UUID、随机密码，或计算文本与本地文件的 SHA-256。" active="/toolbox/generator">
+  <GeneratorWorkbench client:load />
+</ToolLayout>

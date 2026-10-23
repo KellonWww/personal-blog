@@ -13,7 +13,6 @@ const { siteName, active = '', showReadingTools = false } = Astro.props;
 const nav = [
   { key: 'home', label: '首页', href: '/' },
   { key: 'post', label: '文章', href: '/post' },
-  { key: 'private-library', label: '私人文库', href: '/private-library' },
   { key: 'archive', label: '归档', href: '/archive' },
   { key: 'tags', label: '标签', href: '/tags' },
   { key: 'categories', label: '分类', href: '/categories' },
@@ -26,7 +25,7 @@ const nav = [
 <header class="app-header sticky top-0 z-40 border-b border-line">
   <div class="site-shell flex h-16 items-center gap-4">
     <a href="/" class="flex shrink-0 items-center gap-1 text-[0.94rem] font-semibold tracking-tight">
-      <span class="brand-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 5v22M25 5 13 16l12 11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 16h8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+      <span class="brand-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M14.5 19.5C11.5 10.5 18 4.5 28 4C28 14 23.5 21 14.5 19.5Z" fill="currentColor"/><path d="M12.5 21C5.5 21 3.5 16 4 10C10.5 10.5 14 14 12.5 21Z" fill="currentColor" opacity=".6"/><path d="M10.5 28C12 21.5 17 14.5 23 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 17.5 23 10" stroke="var(--surface)" stroke-width="1.5" stroke-linecap="round"/></svg></span>
       <span class="max-w-[11rem] truncate sm:max-w-none">{siteName}</span>
     </a>
 

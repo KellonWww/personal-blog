@@ -1,0 +1,7 @@
+---
+import ToolLayout from '@/layouts/ToolLayout.astro';
+import UrlWorkbench from '@/components/toolbox/UrlWorkbench';
+---
+<ToolLayout title="URL 参数编辑" description="拆解、编辑与重组网址，保留重复参数，不访问目标网站。" active="/toolbox/url">
+  <UrlWorkbench client:load />
+</ToolLayout>

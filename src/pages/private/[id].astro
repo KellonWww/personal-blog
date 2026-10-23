@@ -20,7 +20,7 @@ const rendered = version ? renderPrivateMarkdown(version.content) : '';
 <BaseLayout title="私人文库" description="只属于你的阅读空间。" active="private-library" showReadingTools={Boolean(archive)}>
   <meta slot="head" name="robots" content="noindex, nofollow, noarchive" />
   <div class="mx-auto mb-7 flex max-w-3xl flex-wrap items-center justify-between gap-3 text-sm no-print">
-    <a href="/private-library" class="text-muted hover:text-accent">← 返回私人文库</a>
+    <a href="/private" class="text-muted hover:text-accent">← 返回私人文库</a>
     <span class="chip">仅自己可见</span>
   </div>
   {archive && version ? <article class="mx-auto max-w-3xl">
@@ -42,13 +42,13 @@ const rendered = version ? renderPrivateMarkdown(version.content) : '';
     <div class="prose-editorial mt-8" data-convertible set:html={rendered} />
     <footer class="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5 text-sm text-muted no-print">
       <p>私人阅读 · 不公开分享</p>
-      <div class="flex gap-2"><a class="btn" href="/private-library">返回文库</a><a class="btn" href="/admin?view=archives">管理档案</a></div>
+      <div class="flex gap-2"><a class="btn" href="/private">返回文库</a><a class="btn" href="/admin?view=archives">管理档案</a></div>
     </footer>
     <p class="mt-4 text-xs leading-relaxed text-muted no-print">为保护隐私，文档中的图片不会自动加载，外部链接仅在点击后打开。</p>
   </article> : <section class="mx-auto max-w-3xl border-y border-line py-12">
     <h1 class="text-2xl font-semibold">文档不存在</h1>
     <p class="mt-3 text-sm text-muted">这份文档可能已删除，或其来源已停用。返回文库查看其他文档。</p>
-    <a class="btn mt-6" href="/private-library">返回私人文库</a>
+    <a class="btn mt-6" href="/private">返回私人文库</a>
   </section>}
   {archive && <MermaidEnhancer />}
 </BaseLayout>

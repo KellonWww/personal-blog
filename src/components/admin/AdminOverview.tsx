@@ -62,7 +62,7 @@ export default function AdminOverview({ onNavigate }: Props) {
         <div className="admin-section-heading"><h2 id="inbox-title">待审核互动</h2><button type="button" onClick={() => onNavigate('moderation')}>查看待办{pending > 0 && ` (${formatNumber(pending)})`}</button></div>
         {data.queue.length ? data.queue.slice(0, 3).map((item) => <div className="admin-inbox-item" key={`${item.type}-${item.id}`}><div className="admin-feed-meta"><span className="admin-inbox-author">{item.userName}</span><span>{item.type === 'comment' ? '文章评论' : '留言'}</span></div><p className="admin-inbox-content">{item.content}</p>{item.title && <p className="admin-table-subtitle">{item.title}</p>}</div>) : <div className="admin-ledger-empty"><p>{pending ? '暂无可展示的预览。' : '待办已清空。'}</p><span>{pending ? '进入审核页查看评论与留言。' : '新的评论与留言会在这里等你。'}</span></div>}
       </section>
-      <a className="admin-library-link" href="/private-library"><span>私人文库<small>在阅读页翻阅自己的档案</small></span><AdminArrow /></a>
+      <a className="admin-library-link" href="/private"><span>私人文库<small>在阅读页翻阅自己的档案</small></span><AdminArrow /></a>
     </aside>
   </div>;
 }
