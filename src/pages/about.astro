@@ -6,13 +6,11 @@ const t = translator(locale);
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getSiteProfile } from '@/server/db/settings';
-import { getSiteSummary } from '@/server/db/content';
 import { renderMarkdown } from '@/lib/markdown';
-import { formatNumber } from '@/lib/format';
 import MermaidEnhancer from '@/components/MermaidEnhancer.astro';
 
 const db = env.DB;
-const [profile, summary] = await Promise.all([getSiteProfile(db), getSiteSummary(db)]);
+const profile = await getSiteProfile(db);
 const about = profile.about ? renderMarkdown(profile.about) : '';
 ---
 
@@ -43,24 +41,6 @@ const about = profile.about ? renderMarkdown(profile.about) : '';
         <p class="text-sm text-muted">{t("博主还没有填写「关于我」的内容，可在后台「站点配置」中补充。")}</p>
       )}
     </div>
-  </section>
-
-  <section class="about-ledger mt-12" data-motion>
-    <div class="rule-label">{t("站点数据")}</div>
-    <dl class="mt-3 grid grid-cols-2 gap-x-8 sm:grid-cols-4">
-      {[
-        { label: t('文章'), value: summary.postCount },
-        { label: t('累计字数'), value: summary.totalWords },
-        { label: t('累计阅读'), value: summary.totalViews },
-        { label: t('评论 + 留言'), value: summary.commentCount + summary.guestbookCount }
-      ].map((item) => (
-        <div class="border-t border-line pt-3">
-          <dt class="text-xs text-muted">{t(item.label)}</dt>
-          <dd class="mt-1 font-mono text-xl font-semibold tabular-nums">{formatNumber(item.value, locale)}</dd>
-        </div>
-      ))}
-    </dl>
-    {profile.startedAt && <p class="mt-4 text-xs text-muted">{t("自 {0} 开始记录。", profile.startedAt)}</p>}
   </section>
 
   <MermaidEnhancer />

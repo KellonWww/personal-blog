@@ -34,15 +34,14 @@ const href = `/post/${post.slug}`;
         <a href={href} class="transition-colors">{post.title}</a>
       </h2>
       {post.summary && <p class="article-summary line-clamp-2">{post.summary}</p>}
-      <div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted">
+      {(post.categories.length > 0 || post.tags.length > 0) && <div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted">
         {post.categories.map((category) => (
           <a href={`/post?category=${category.slug}`} class="transition-colors hover:text-accent">{category.name}</a>
         ))}
         {post.tags.slice(0, 3).map((tag) => (
           <a href={`/post?tag=${tag.slug}`} class="transition-colors hover:text-accent">#{tag.name}</a>
         ))}
-        <span class="ml-auto font-mono text-[0.7rem] tabular-nums">{t("{0} 阅读 · {1} 评论", post.viewCount, post.commentCount)}</span>
-      </div>
+      </div>}
     </div>
 
     {post.coverImage && <a

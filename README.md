@@ -190,7 +190,7 @@ UUID / 密码使用浏览器安全随机源；每个密码包含所有选中的�
 node scripts/studio-ui-test.mjs [playwright模块路径] [浏览器channel]
 ```
 
-覆盖双主题、13 个路由、320–1440px 布局、文字对比和快捷键搜索；不修改业务数据。
+覆盖双主题、13 个路由、320–1440px 布局、文字对比和快捷键搜索；不修改业务数据。间距回归：运行 `node scripts/spacing-ui-test.mjs`（同上参数），通过 `UI_TEST_BASE` 指向开发服务或构建后的本地 preview，验证双语卡片留白；`editorial-ui-test.mjs`（同上参数）验证前台去统计化、搜索反馈及双语响应式布局。
 证据：~/.agents/evidence/personal-blog/studio-audit-20261024.md
 
 ### 搜索与主题交互

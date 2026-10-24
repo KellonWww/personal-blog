@@ -95,8 +95,6 @@
 .specimen-note-title:hover { color: var(--accent); }
 .specimen-note p { font-size: .7rem; color: var(--muted); margin-top: .4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .folio-colophon { padding: 1.25rem 0; font-size: .74rem; border-top-color: transparent; }
-.folio-colophon dl { gap: 2rem; }
-.folio-colophon dd { font-family: var(--font-sans); font-size: 1.15rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 .folio-colophon p { line-height: 1.8; }
 .notes-section { grid-template-columns: minmax(0, .75fr) minmax(0, 2fr); gap: 7vw; padding: 5rem 0 4rem; }
 .notes-index h2 { font-size: clamp(2rem, 3.2vw, 3.5rem); font-weight: 500; letter-spacing: -.045em; }
@@ -162,7 +160,6 @@
 .tool-menu { padding: 1rem; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; }
 .about-profile { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: clamp(1.5rem, 4vw, 3.5rem); }
 .about-profile > div:first-child img { width: 6rem; height: 6rem; border-radius: 24px; }
-.about-ledger { max-width: 70rem; margin-inline: auto; }
 .reading-sheet { max-width: 58rem; padding: clamp(1.25rem, 4vw, 4rem); background: var(--paper); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--surface-shadow); }
 .reading-sheet > header h1 { font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 500; line-height: 1.4; text-wrap: pretty; }
 .reading-sheet .prose-editorial { font-size: 1rem; line-height: 2; }
@@ -179,7 +176,7 @@
 /* 撞色按区域分工：主色构建结构、副色点亮提示，阅读表面不染色。 */
 .folio-copy h1 { color: var(--accent); }
 .folio-about { color: var(--secondary-text); }
-.folio-colophon dd, .catalog-symbol, .timeline-year-label h2 { color: var(--secondary-text); }
+.catalog-symbol, .timeline-year-label h2 { color: var(--secondary-text); }
 .specimen-shadow { background: var(--specimen-shadow); border-color: transparent; }
 .specimen-plate { background: color-mix(in srgb, var(--specimen-surface) 94%, transparent); border-color: var(--specimen-surface); }
 .specimen-caption, .specimen-footnote { color: var(--specimen-ink); }
@@ -249,8 +246,6 @@
   .specimen-footnote { inset: auto 16px 16px; font-size: .54rem; }
   .botanical-study .specimen-note { left: 0; right: 30px; padding: 1rem 1.2rem; }
   .folio-colophon { gap: .5rem; align-items: start; padding-block: 1rem; }
-  .folio-colophon dl { gap: 1.25rem; }
-  .folio-colophon dd { font-size: 1rem; }
   .folio-colophon p { font-size: .65rem; }
   .notes-section { padding: 3rem 0; gap: 1.5rem; }
   .notes-index h2 { font-size: 2rem; }

@@ -1,3 +1,5 @@
+/* Keep legacy inner-page defaults below the studio skin, even when build chunks reorder. */
+@layer components {
 /* Inner pages borrow the garden's botanical mark, not a second visual system. */
 .page-heading { display: flex; align-items: center; justify-content: space-between; gap: 2rem; min-height: 12rem; padding: 1.5rem 0 2rem; position: relative; }
 .page-heading::after { content: ''; position: absolute; inset: auto 0 -1px; height: 2px; background: var(--accent); transform: scaleX(.12); transform-origin: left; }
@@ -18,7 +20,6 @@
 .category-entry:nth-child(odd) { border-right: 1px solid var(--line); padding-left: 0; }
 .category-entry-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: .75rem; }
 .category-entry h2 { font-size: clamp(1.05rem, 1.5vw, 1.45rem); font-weight: 500; overflow-wrap: anywhere; }
-.category-entry-title > span { color: var(--muted); font-size: .7rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .category-entry p { color: var(--muted); font-size: .8rem; line-height: 1.8; margin-top: .7rem; }
 .category-entry svg { position: absolute; right: 1rem; top: 1.9rem; width: 1.15rem; height: 1.15rem; color: var(--accent); }
 .category-entry::after { content: ''; position: absolute; inset: auto 0 -1px; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; }
@@ -27,18 +28,15 @@
 .topic-link { display: inline-flex; align-items: baseline; gap: .35rem; padding: .7rem 0; max-width: 100%; font-size: clamp(1.1rem, 1.8vw, 1.8rem); overflow-wrap: anywhere; }
 .topic-link[data-weight="major"] { font-size: clamp(1.8rem, 3.5vw, 3.1rem); font-weight: 500; }
 .topic-hash { color: var(--accent); font-size: .7em; }
-.topic-count { align-self: start; color: var(--muted); font-size: .7rem; padding-top: .3rem; font-weight: 400; }
 .archive-timeline { padding: 3rem 0; }
 .timeline-year { display: grid; grid-template-columns: minmax(7rem, .25fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); margin-bottom: 3.5rem; }
 .timeline-year-label { align-self: start; position: sticky; top: 6rem; }
 .timeline-year-label h2 { font-size: clamp(2.5rem, 5vw, 5rem); line-height: 1.1; letter-spacing: -.07em; color: var(--accent); }
-.timeline-year-label > span { display: block; color: var(--muted); font-size: .75rem; margin-top: .8rem; }
 .timeline-year ul { border-left: 1px solid var(--line); padding-left: 2rem; }
-.timeline-entry { display: grid; grid-template-columns: 6rem minmax(0, 1fr) auto; align-items: baseline; gap: 1rem; padding: 1.15rem 0; border-bottom: 1px solid var(--line); position: relative; }
+.timeline-entry { display: grid; grid-template-columns: 6rem minmax(0, 1fr); align-items: baseline; gap: 1rem; padding: 1.15rem 0; border-bottom: 1px solid var(--line); position: relative; }
 .timeline-entry::before { content: ''; position: absolute; left: calc(-2rem - 4px); top: 1.65rem; width: 7px; height: 7px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 50%; }
 .timeline-entry:focus-within::before { background: var(--accent); border-color: var(--accent); }
 .timeline-entry a { overflow-wrap: anywhere; }
-.timeline-comments { color: var(--muted); font-size: .7rem; font-variant-numeric: tabular-nums; }
 .tool-shelf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 3rem 0; border-top: 1px solid var(--line); }
 .tool-entry { display: flex; flex-direction: column; align-items: start; min-width: 0; padding: clamp(1.5rem, 3vw, 3rem); border-bottom: 1px solid var(--line); }
 .tool-entry:nth-child(odd) { border-right: 1px solid var(--line); padding-left: 0; }
@@ -87,7 +85,7 @@
   .timeline-year { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
   .timeline-year-label { position: static; display: flex; align-items: baseline; gap: 1rem; }
   .timeline-year ul { padding-left: 1.2rem; }
-  .timeline-entry { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem .75rem; }
+  .timeline-entry { grid-template-columns: minmax(0, 1fr); gap: .4rem .75rem; }
   .timeline-entry time { grid-column: 1 / -1; }
   .timeline-entry::before { left: calc(-1.2rem - 4px); }
   .tool-shelf { grid-template-columns: minmax(0, 1fr); margin-top: 2rem; }
@@ -97,4 +95,5 @@
   .page-heading-sprout { display: none; }
   .category-index { grid-template-columns: minmax(0, 1fr); }
   .category-entry, .category-entry:nth-child(odd) { border-right: 0; padding-left: 0; }
+}
 }

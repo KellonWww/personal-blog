@@ -16,20 +16,19 @@ const groups = groupByYear(posts);
 ---
 
 <BaseLayout title={t("归档")} description={t("按时间浏览全部文章")} active="archive">
-  <PageHeading title={t("时光归档")} description={t("沿着时间，看看这座花园如何生长。")} meta={t("{0} 篇文章", posts.length)} />
+  <PageHeading title={t("时光归档")} description={t("沿着时间，看看这座花园如何生长。")} />
   {groups.length === 0 ? (
     <p class="mt-4 py-12 text-sm text-muted">{t("还没有可归档的文章。")}</p>
   ) : (
     <div class="archive-timeline">
       {groups.map((group) => (
         <section class="timeline-year">
-          <div class="timeline-year-label" data-motion><h2>{group.year}</h2><span>{t("{0} 篇记录", group.posts.length)}</span></div>
+          <div class="timeline-year-label" data-motion><h2>{group.year}</h2></div>
           <ul>
             {group.posts.map((post) => (
               <li class="timeline-entry" data-motion>
                 <time class="font-mono text-xs text-muted tabular-nums">{formatDate(post.publishedAt ?? post.createdAt, locale)}</time>
                 <a href={`/post/${post.slug}`} class="font-medium transition-colors hover:text-accent">{post.title}</a>
-                <span class="timeline-comments" aria-label={t("{0} 条评论", post.commentCount)}>{post.commentCount}</span>
               </li>
             ))}
           </ul>

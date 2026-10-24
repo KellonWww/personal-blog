@@ -1048,5 +1048,8 @@
   "{0}完成：实际更新 {1} 篇文章。": "{0} completed: {1} posts updated.",
   "已处理 {0} 条，{1} 条失败：{2}": "Processed {0} items; {1} failed: {2}",
   "已处理 {0} 条": "Processed {0} items",
-  "已记录发布确认 v{0}。{1}": "Publication confirmation v{0} recorded. {1}"
+  "已记录发布确认 v{0}。{1}": "Publication confirmation v{0} recorded. {1}",
+  "从关键词浏览相关内容。": "Browse related writing by keyword.",
+  "文章标签": "Article tags",
+  "默认展示最新文章": "Showing the latest articles"
 }

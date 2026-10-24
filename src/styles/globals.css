@@ -1065,10 +1065,7 @@ html[data-theme-transition]::view-transition-new(root) {
   .growth-status { display: flex; align-items: center; gap: .45rem; white-space: nowrap; }
   .growth-status i { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
   .folio-colophon { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 1.1rem 0; display: flex; align-items: center; gap: 2rem; justify-content: space-between; color: var(--muted); font-size: .72rem; }
-  .folio-colophon dl { display: flex; gap: 1.5rem; flex: none; }
-  .folio-colophon dl > div { display: flex; align-items: baseline; gap: .4rem; }
-  .folio-colophon dd { color: var(--ink); font-family: var(--font-mono); }
-  .folio-colophon p { max-width: 60ch; text-align: right; }
+  .folio-colophon p { max-width: 60ch; text-align: left; }
   .folio-colophon p > span { color: var(--ink); margin-right: .7rem; }
   .notes-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 6vw; padding: clamp(4rem, 8vw, 8rem) 0; scroll-margin-top: 112px; align-items: start; }
   .notes-index { align-self: start; }

@@ -6,24 +6,17 @@ const t = translator(locale);
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import ArticleCard from '@/components/ArticleCard.astro';
-import { getSiteSummary, listPosts, listTags } from '@/server/db/content';
+import { listPosts, listTags } from '@/server/db/content';
 import { getSiteProfile } from '@/server/db/settings';
 import GardenMotion from '@/components/GardenMotion.tsx';
 import BotanicalStudy from '@/components/BotanicalStudy.astro';
-import { formatNumber } from '@/lib/format';
 
 const db = env.DB;
-const [profile, latest, tags, summary] = await Promise.all([
+const [profile, latest, tags] = await Promise.all([
   getSiteProfile(db),
   listPosts(db, { page: 1, pageSize: 6 }),
-  listTags(db),
-  getSiteSummary(db)
+  listTags(db)
 ]);
-
-const lede = [
-  { label: '篇文章', value: summary.postCount },
-  { label: '字记录', value: summary.totalWords }
-];
 ---
 
 <BaseLayout title={profile.name} description={profile.bio} active="home">
@@ -44,10 +37,9 @@ const lede = [
       <BotanicalStudy latest={latest.items[0]} />
     </section>
 
-    <div class="folio-colophon">
-      <dl>{lede.map((item) => <div><dd>{formatNumber(item.value, locale)}</dd><dt>{t(item.label)}</dt></div>)}</dl>
-      {profile.announcement && <p><span>{t("近况")}</span>{profile.announcement}</p>}
-    </div>
+    {profile.announcement && <div class="folio-colophon">
+      <p><span>{t("近况")}</span>{profile.announcement}</p>
+    </div>}
 
     <section class="notes-section" id="latest" aria-labelledby="notes-title">
       <div class="notes-index">
@@ -58,7 +50,7 @@ const lede = [
       </div>
       <div class="notes-feed">
         {latest.items.length === 0 ? <div class="empty-state"><h3>{t("暂无文章。")}</h3><a href="/guestbook" class="text-link">{t("去留言")}</a></div> : latest.items.map((post, index) => <ArticleCard post={post} featured={index === 0} motion />)}
-        <a href="/post" class="notes-all" data-magnetic><span>{t("查看全部文章")}</span><span class="font-mono">{formatNumber(summary.postCount, locale)} <span aria-hidden="true">↗</span></span></a>
+        <a href="/post" class="notes-all" data-magnetic><span>{t("查看全部文章")}</span><span aria-hidden="true">↗</span></a>
       </div>
     </section>
 

@@ -37,7 +37,7 @@ function pageHref(target: number): string {
 ---
 
 <BaseLayout title={t("文章")} description={t("全部文章列表")} active="post">
-  <PageHeading title={t("文章索引")} description={t("从技术到生活，把写过的东西慢慢翻一遍。")} meta={t("{0} 篇文章", result.total)} />
+  <PageHeading title={t("文章索引")} description={t("从技术到生活，把写过的东西慢慢翻一遍。")} />
 
   {filters.length > 0 && (
     <div class="mt-4 flex flex-wrap items-center gap-2">
@@ -70,7 +70,6 @@ function pageHref(target: number): string {
           {categories.map((item) => (
             <li class="flex items-center justify-between border-b border-line py-1.5">
               <a href={`/post?category=${item.slug}`} class="hover:text-accent">{item.name}</a>
-              <span class="text-xs text-muted tabular-nums">{item.postCount ?? 0}</span>
             </li>
           ))}
         </ul>

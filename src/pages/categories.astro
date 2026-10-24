@@ -13,7 +13,7 @@ const categories = await listCategories(db);
 ---
 
 <BaseLayout title={t("分类")} description={t("全部分类")} active="categories">
-  <PageHeading title={t("分类索引")} description={t("循着一个主题，找到感兴趣的下一篇。")} meta={t("{0} 个分类", categories.length)} />
+  <PageHeading title={t("分类索引")} description={t("循着一个主题，找到感兴趣的下一篇。")} />
   {categories.length === 0 ? (
     <p class="mt-4 py-12 text-sm text-muted">{t("还没有分类。")}</p>
   ) : (
@@ -22,7 +22,7 @@ const categories = await listCategories(db);
       <div class="category-index">
         {categories.map((category) => (
           <a href={`/post?category=${category.slug}`} class="category-entry" data-motion>
-            <div class="category-entry-title"><h2>{category.name}</h2><span>{t("{0} 篇文章", category.postCount ?? 0)}</span></div>
+            <div class="category-entry-title"><h2>{category.name}</h2></div>
             <p>{category.description || t('这一枝的记录，慢慢积累。')}</p>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5" /></svg>
           </a>

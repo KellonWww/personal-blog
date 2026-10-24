@@ -14,18 +14,18 @@ const max = Math.max(1, ...tags.map((tag) => tag.postCount ?? 0));
 ---
 
 <BaseLayout title={t("标签")} description={t("全部标签")} active="tags">
-  <PageHeading title={t("主题拾取")} description={t("不必按顺序读，从一个关键词开始就好。")} meta={t("{0} 个标签", tags.length)} />
+  <PageHeading title={t("主题拾取")} description={t("不必按顺序读，从一个关键词开始就好。")} />
   {tags.length === 0 ? (
     <p class="mt-4 py-12 text-sm text-muted">{t("还没有标签。")}</p>
   ) : (
     <div class="catalog-layout tag-layout">
-      <aside class="catalog-aside" data-motion><span class="catalog-symbol" aria-hidden="true">#</span><h2>{t("想法的交点。")}</h2><p>{t("一个词，可能连着几种不同的好奇心。字号越大，留下的记录越多。")}</p><a href="/categories" class="catalog-all">{t("按分类浏览")}</a></aside>
-      <div class="topic-field" aria-label={t("按文章数量呈现的标签")}>
+      <aside class="catalog-aside" data-motion><span class="catalog-symbol" aria-hidden="true">#</span><h2>{t("想法的交点。")}</h2><p>{t("从关键词浏览相关内容。")}</p><a href="/categories" class="catalog-all">{t("按分类浏览")}</a></aside>
+      <div class="topic-field" aria-label={t("文章标签")}>
         {tags.map((tag) => {
           const ratio = (tag.postCount ?? 0) / max;
           return (
             <a href={`/post?tag=${tag.slug}`} class="topic-link" data-weight={ratio > .5 ? 'major' : 'minor'} data-motion>
-              <span class="topic-hash" aria-hidden="true">#</span><span>{tag.name}</span><span class="topic-count">{tag.postCount ?? 0}<span class="sr-only">{t("篇文章")}</span></span>
+              <span class="topic-hash" aria-hidden="true">#</span><span>{tag.name}</span>
             </a>
           );
         })}

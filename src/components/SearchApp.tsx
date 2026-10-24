@@ -85,8 +85,8 @@ function SearchApp({ inputId = 'garden-search', autoFocus = false }: Props) {
         {query && <button type="button" className="btn" onClick={() => setQuery('')}>{t("清空")}</button>}
         </div>
         <p className="search-status mt-3 text-xs text-muted" role="status" aria-live="polite">
-          {loading ? t('正在整理文章索引…') : error ? t('索引尚未就绪') : query ? t("找到 {0} 篇相关文章", results.length) : t("共 {0} 篇文章 · 展示最近 {1} 篇", items.length, results.length)}
-          {query ? t('（按空格分隔可多关键词匹配）') : t('（默认展示最新文章）')}
+          {loading ? t('正在整理文章索引…') : error ? t('索引尚未就绪') : query ? t("找到 {0} 篇相关文章", results.length) : t('默认展示最新文章')}
+          {query && !loading && !error && t('（按空格分隔可多关键词匹配）')}
         </p>
       </div>
 
