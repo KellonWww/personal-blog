@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useRef, useState } from 'react';
 import { formatZonedDate } from '@/lib/toolbox';
 
@@ -10,7 +11,8 @@ function monthStart(year: number, month: number) {
   return date;
 }
 
-export default function DateTimePicker({ value, zone, onChange }: Props) {
+function DateTimePicker({ value, zone, onChange }: Props) {
+  const { t, locale } = useI18n();
   const dialog = useRef<HTMLDialogElement>(null);
   const [selected, setSelected] = useState('');
   const [year, setYear] = useState(2026);
@@ -43,21 +45,23 @@ export default function DateTimePicker({ value, zone, onChange }: Props) {
   const offset = (start.getUTCDay() + 6) % 7;
   const days = (monthStart(year, month + 1).getTime() - start.getTime()) / 86_400_000;
   return <div className="tool-field">
-    <label htmlFor="datetime">所选时区的日期与时间</label>
-    <div className="tool-datetime-input"><input id="datetime" type="text" value={value} placeholder="YYYY-MM-DDTHH:mm:ss.SSS" spellCheck={false} onChange={(event) => onChange(event.target.value)} /><button type="button" className="btn btn-ghost" aria-haspopup="dialog" onClick={open}>选择日期</button></div>
+    <label htmlFor="datetime">{t("所选时区的日期与时间")}</label>
+    <div className="tool-datetime-input"><input id="datetime" type="text" value={value} placeholder="YYYY-MM-DDTHH:mm:ss.SSS" spellCheck={false} onChange={(event) => onChange(event.target.value)} /><button type="button" className="btn btn-ghost" aria-haspopup="dialog" onClick={open}>{t("选择日期")}</button></div>
     <dialog ref={dialog} className="tool-calendar" aria-labelledby="calendar-title" aria-describedby="calendar-zone" onClick={(event) => { if (event.target === event.currentTarget) { const bounds = event.currentTarget.getBoundingClientRect(); if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.current?.close(); } }}>
-      <div className="tool-calendar-heading"><h3 id="calendar-title">选择日期与时间</h3><button type="button" className="btn btn-ghost" onClick={() => dialog.current?.close()} aria-label="关闭日期选择">关闭</button></div>
-      <p id="calendar-zone" className="tool-note">时区：{zone}</p>
-      <div className="tool-calendar-nav"><button type="button" className="btn btn-ghost" aria-label="上个月" disabled={year === 1 && month === 1} onClick={() => moveMonth(-1)}>‹</button><label htmlFor="calendar-year"><span className="sr-only">年份</span><input id="calendar-year" type="number" min="1" max="9999" value={year} onChange={(event) => { const next = Number(event.target.value); if (Number.isInteger(next) && next >= 1 && next <= 9999) setYear(next); }} /></label><label htmlFor="calendar-month"><span className="sr-only">月份</span><select id="calendar-month" aria-label="月份" value={month} onChange={(event) => setMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index} value={index + 1}>{index + 1} 月</option>)}</select></label><button type="button" className="btn btn-ghost" aria-label="下个月" disabled={year === 9999 && month === 12} onClick={() => moveMonth(1)}>›</button></div>
-      <div className="tool-calendar-grid">{weekdays.map((day) => <span key={day} className="tool-calendar-weekday" aria-hidden="true">{day}</span>)}{Array.from({ length: offset }, (_, index) => <span key={`blank-${index}`} />)}{Array.from({ length: days }, (_, index) => {
+      <div className="tool-calendar-heading"><h3 id="calendar-title">{t("选择日期与时间")}</h3><button type="button" className="btn btn-ghost" onClick={() => dialog.current?.close()} aria-label={t("关闭日期选择")}>{t("关闭")}</button></div>
+      <p id="calendar-zone" className="tool-note">{t("时区：")}{zone}</p>
+      <div className="tool-calendar-nav"><button type="button" className="btn btn-ghost" aria-label={t("上个月")} disabled={year === 1 && month === 1} onClick={() => moveMonth(-1)}>‹</button><label htmlFor="calendar-year"><span className="sr-only">{t("年份")}</span><input id="calendar-year" type="number" min="1" max="9999" value={year} onChange={(event) => { const next = Number(event.target.value); if (Number.isInteger(next) && next >= 1 && next <= 9999) setYear(next); }} /></label><label htmlFor="calendar-month"><span className="sr-only">{t("月份")}</span><select id="calendar-month" aria-label={t("月份")} value={month} onChange={(event) => setMonth(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => <option key={index} value={index + 1}>{locale === 'en' ? new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' }).format(new Date(Date.UTC(2024, index, 1))) : `${index + 1}月`}</option>)}</select></label><button type="button" className="btn btn-ghost" aria-label={t("下个月")} disabled={year === 9999 && month === 12} onClick={() => moveMonth(1)}>›</button></div>
+      <div className="tool-calendar-grid">{weekdays.map((day) => <span key={day} className="tool-calendar-weekday" aria-hidden="true">{t(day)}</span>)}{Array.from({ length: offset }, (_, index) => <span key={`blank-${index}`} />)}{Array.from({ length: days }, (_, index) => {
         const day = index + 1;
         const date = `${String(year).padStart(4, '0')}-${pad(month)}-${pad(day)}`;
         return <button key={date} type="button" className="tool-calendar-day" aria-label={date} aria-pressed={selected === date} onClick={() => { setSelected(date); setError(''); }}>{day}</button>;
       })}</div>
-      <p className="tool-note" aria-live="polite">已选：{selected}</p>
-      <label className="tool-field" htmlFor="calendar-time"><span>时间（时:分:秒.毫秒）</span><input id="calendar-time" type="text" value={time} placeholder="00:00:00.000" onChange={(event) => { setTime(event.target.value); setError(''); }} /></label>
-      {error && <p className="tool-error" role="alert">{error}</p>}
-      <div className="tool-calendar-footer"><button type="button" className="btn btn-ghost" onClick={() => dialog.current?.close()}>取消</button><button type="button" className="btn btn-primary" onClick={confirm}>确定日期</button></div>
+      <p className="tool-note" aria-live="polite">{t("已选：")}{selected}</p>
+      <label className="tool-field" htmlFor="calendar-time"><span>{t("时间（时:分:秒.毫秒）")}</span><input id="calendar-time" type="text" value={time} placeholder="00:00:00.000" onChange={(event) => { setTime(event.target.value); setError(''); }} /></label>
+      {error && <p className="tool-error" role="alert">{t(error)}</p>}
+      <div className="tool-calendar-footer"><button type="button" className="btn btn-ghost" onClick={() => dialog.current?.close()}>{t("取消")}</button><button type="button" className="btn btn-primary" onClick={confirm}>{t("确定日期")}</button></div>
     </dialog>
   </div>;
 }
+
+export default withLocale(DateTimePicker);

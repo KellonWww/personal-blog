@@ -1,0 +1,195 @@
+---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
+import SearchDialogContent from '@/components/SearchDialogContent';
+---
+<dialog id="site-search-dialog" class="site-search-dialog" aria-labelledby="site-search-title" aria-describedby="site-search-description">
+  <div class="site-search-heading">
+    <div>
+      <h2 id="site-search-title" class="text-xl font-semibold">{t("站内搜索")}</h2>
+      <p id="site-search-description" class="mt-1 text-xs text-muted">{t("搜索文章标题、摘要、标签和分类")}</p>
+    </div>
+    <button type="button" class="btn btn-ghost" data-close-search aria-label={t("关闭搜索")}>{t("关闭")}<kbd>Esc</kbd></button>
+  </div>
+  <div data-search-content><SearchDialogContent locale={locale} client:load /></div>
+  <footer class="site-search-footer"><span lang={locale}>{t("Search the archive.")}</span><span><kbd>Tab</kbd>{t("跳转")}<kbd>Esc</kbd>{t("收起")}</span></footer>
+</dialog>
+
+<script>
+
+  const dialog = document.querySelector<HTMLDialogElement>('#site-search-dialog');
+  const content = dialog?.querySelector<HTMLElement>('[data-search-content]');
+  if (dialog && content) {
+    let mounted = false;
+    let previousOverflow = '';
+    let returnFocus: HTMLElement | null = null;
+
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let closeTimer: ReturnType<typeof setTimeout> | undefined;
+    const finishClose = () => {
+      clearTimeout(closeTimer);
+      delete dialog.dataset.state;
+      dialog.close();
+      document.documentElement.style.overflow = previousOverflow;
+      returnFocus?.focus({ preventScroll: true });
+    };
+
+    const closeSearch = () => {
+      if (!dialog.open || dialog.dataset.state === 'closing') return;
+      if (motion.matches) { finishClose(); return; }
+      dialog.dataset.state = 'closing';
+      // 后台标签页可能不派发 animationend，保底释放模态和滚动锁。
+      closeTimer = setTimeout(finishClose, 240);
+    };
+    dialog.addEventListener('animationend', (event) => {
+      if (event.target === dialog && event.animationName.startsWith('search-leave') && dialog.dataset.state === 'closing') finishClose();
+    });
+    motion.addEventListener('change', () => {
+      if (motion.matches && dialog.dataset.state === 'closing') finishClose();
+    });
+    const openSearch = () => {
+      clearTimeout(closeTimer);
+      delete dialog.dataset.state;
+      if (!dialog.open) {
+        returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        previousOverflow = document.documentElement.style.overflow;
+        dialog.showModal();
+        document.documentElement.style.overflow = 'hidden';
+      }
+      if (!mounted) {
+        // 首次打开才挂载，普通浏览不请求文章索引；关闭后保留搜索内容。
+        document.dispatchEvent(new Event('site-search-open'));
+        mounted = true;
+      } else {
+        dialog.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
+      }
+    };
+
+    document.querySelectorAll<HTMLAnchorElement>('[data-open-search]').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+        event.preventDefault();
+        openSearch();
+      });
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented || event.isComposing || event.altKey || event.shiftKey) return;
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        if (!event.repeat) openSearch();
+      }
+    });
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !event.isComposing) {
+        event.preventDefault();
+        closeSearch();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]'))
+        .filter((element) => element.tabIndex >= 0 && !element.matches(':disabled') && element.getClientRects().length > 0);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    });
+    dialog.querySelector('[data-close-search]')?.addEventListener('click', closeSearch);
+    // 只在按下与松开都位于遮罩时关闭，避免拖选文字越过面板误关。
+    let pointerStartedOutside = false;
+    const isOutside = (event: PointerEvent) => {
+      const rect = dialog.getBoundingClientRect();
+      return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+    };
+    dialog.addEventListener('pointerdown', (event) => { pointerStartedOutside = isOutside(event); });
+    dialog.addEventListener('pointerup', (event) => {
+      if (pointerStartedOutside && isOutside(event)) closeSearch();
+      pointerStartedOutside = false;
+    });
+    dialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      closeSearch();
+    });
+  }
+</script>
+
+<style>
+  .site-search-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(44rem, calc(100vw - 2rem));
+    max-width: none;
+    max-height: min(44rem, calc(100dvh - 2rem));
+    margin: auto;
+    padding: clamp(1.1rem, 3vw, 1.8rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    border: 1px solid color-mix(in srgb, var(--paper) 60%, var(--line));
+    border-radius: 24px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 28px 90px #080e2445, inset 0 1px 0 #ffffff30;
+  }
+  @supports (backdrop-filter: blur(20px)) {
+    .site-search-dialog { background: color-mix(in srgb, var(--paper) 78%, transparent); backdrop-filter: blur(36px) saturate(135%); }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .site-search-dialog { background: var(--paper); backdrop-filter: none; }
+  }
+  .site-search-dialog::backdrop { background: color-mix(in srgb, var(--scrim) 65%, transparent); backdrop-filter: blur(5px); }
+  @media (prefers-reduced-motion: no-preference) {
+    .site-search-dialog[open] { animation: search-enter 280ms cubic-bezier(.16, 1, .3, 1) both; transform-origin: 50% 45%; }
+    .site-search-dialog[open]::backdrop { animation: search-scrim-in 280ms ease-out both; }
+    .site-search-dialog[data-state="closing"] { animation: search-leave 160ms ease-in both; pointer-events: none; }
+    .site-search-dialog[data-state="closing"]::backdrop { animation: search-scrim-out 160ms ease-in both; }
+  }
+  @keyframes search-enter {
+    from { opacity: 0; transform: translateY(14px) scale(.97); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes search-leave {
+    from { opacity: 1; transform: none; }
+    to { opacity: 0; transform: translateY(8px) scale(.985); }
+  }
+  @keyframes search-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes search-scrim-out { from { opacity: 1; } to { opacity: 0; } }
+  .site-search-dialog :global(:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .site-search-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.3rem; }
+  .site-search-heading button { flex-shrink: 0; }
+  .site-search-heading kbd { font-size: .7rem; color: var(--muted); }
+  .site-search-dialog :global(li), .site-search-dialog :global(.search-box) { overflow-wrap: anywhere; }
+  .site-search-heading h2 { font-size: 1rem; font-weight: 600; letter-spacing: .02em; }
+  .site-search-heading button { padding: .35rem .6rem; min-height: 32px; font-size: .7rem; border: 1px solid var(--line); border-radius: 8px; }
+  .site-search-dialog :global(.search-box) { background: transparent; border: 0; padding: 0; border-radius: 0; }
+  .site-search-dialog :global(.search-box label) { font-family: var(--font-serif); font-size: clamp(1.2rem, 3vw, 1.55rem); margin-bottom: .8rem; font-weight: 500; }
+  .site-search-dialog :global(.search-input-row) { padding: .2rem .8rem; gap: .6rem; border: 1px solid var(--line-strong); border-radius: 13px; background: color-mix(in srgb, var(--paper) 65%, transparent); transition: border-color 180ms, box-shadow 180ms; }
+  .site-search-dialog :global(.search-input-row:focus-within) { border-color: var(--accent-line); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent); }
+  .site-search-dialog :global(.search-input-icon) { color: var(--muted); flex-shrink: 0; }
+  .site-search-dialog :global(.field) { background: transparent; border: 0; box-shadow: none; border-radius: 0; padding: .85rem 0; min-width: 0; font-size: 1rem; }
+  .site-search-dialog :global(.field:focus-visible) { outline: none; }
+  .site-search-dialog :global(.search-input-row .btn) { padding: .3rem .5rem; min-height: 30px; font-size: .7rem; flex-shrink: 0; background: transparent; }
+  .site-search-dialog :global(.search-status) { font-size: .7rem; line-height: 1.8; margin-top: .65rem; }
+  .site-search-dialog :global(.search-results) { margin-top: 1rem; max-height: min(24rem, 38dvh); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; padding-right: .3rem; }
+  .site-search-dialog :global(.search-result) { position: relative; padding: 1rem .8rem; margin-top: 0; border-color: color-mix(in srgb, var(--line) 65%, transparent); border-radius: 10px; transition: background 160ms; }
+  .site-search-dialog :global(.search-result:hover), .site-search-dialog :global(.search-result:focus-within) { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
+  .site-search-dialog :global(.search-result-title) { display: block; padding-right: 1.2rem; font-weight: 500; }
+
+  .site-search-dialog :global(.search-result p) { font-size: .8rem; line-height: 1.7; }
+  .site-search-dialog :global(.search-result .chip) { background: color-mix(in srgb, var(--paper) 65%, transparent); font-size: .65rem; padding: .1rem .4rem; }
+  .site-search-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .6rem; border-top: 1px solid var(--line); margin-top: 1.2rem; padding-top: .9rem; font-size: .65rem; color: var(--muted); }
+  .site-search-footer kbd { padding: .1rem .3rem; border: 1px solid var(--line); border-radius: 4px; margin: 0 .15rem; font: inherit; }
+  @media (prefers-reduced-transparency: reduce) {
+    .site-search-dialog::backdrop { backdrop-filter: none; background: var(--scrim); }
+    .site-search-dialog :global(.search-input-row) { background: var(--paper); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-search-dialog :global(.search-input-row), .site-search-dialog :global(.search-result) { transition: none; }
+  }
+</style>

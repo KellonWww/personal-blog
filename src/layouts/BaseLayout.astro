@@ -1,10 +1,18 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('Vary', 'Cookie');
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import { env } from 'cloudflare:workers';
 import '@fontsource-variable/outfit';
 import '@/styles/globals.css';
 import Header from '@/components/Header.astro';
 import Footer from '@/components/Footer.astro';
+import SearchDialog from '@/components/SearchDialog.astro';
 import '@/styles/interactions.css';
+import '@/styles/studio.css';
 import { getSiteProfile } from '@/server/db/settings';
 
 interface Props {
@@ -33,7 +41,7 @@ const socialLinks = profile?.socialLinks ?? [];
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="scroll-smooth">
+<html lang={locale} class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -47,7 +55,7 @@ const socialLinks = profile?.socialLinks ?? [];
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content={siteName} />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#142126" />
+    <meta name="theme-color" content="#141b2d" />
     <link rel="alternate" type="application/rss+xml" title={siteName} href="/rss.xml" />
     <script is:inline>
       (function () {
@@ -63,15 +71,15 @@ const socialLinks = profile?.socialLinks ?? [];
         root.setAttribute('data-theme', id);
         root.classList.toggle('dark', id === 'moye');
         var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute('content', id === 'moye' ? '#142126' : '#f0ecdf');
+        if (meta) meta.setAttribute('content', id === 'moye' ? '#141b2d' : '#f4f0e7');
       })();
     </script>
     <slot name="head" />
   </head>
-  <body class="min-h-screen">
-    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-ink">跳到正文</a>
+  <body class="public-site min-h-screen">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-ink">{t("跳到正文")}</a>
     <Header siteName={siteName} active={active} showReadingTools={showReadingTools} />
-    <main id="main" class="site-shell py-6 md:py-8">
+    <main id="main" class="site-shell site-main py-6 md:py-8">
       <slot />
     </main>
     <Footer siteName={siteName} icp={profile?.icp} startedAt={profile?.startedAt} socialLinks={socialLinks} />
@@ -86,6 +94,7 @@ const socialLinks = profile?.socialLinks ?? [];
         });
       }
     </script>
+    <SearchDialog />
     <slot name="scripts" />
   </body>
 </html>

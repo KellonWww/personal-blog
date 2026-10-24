@@ -1,10 +1,14 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 ---
 
-<AdminLayout title="控制台">
+<AdminLayout title={t("控制台")}>
   <div>
-    <AdminDashboard client:load />
+    <AdminDashboard locale={locale} client:load />
   </div>
 </AdminLayout>

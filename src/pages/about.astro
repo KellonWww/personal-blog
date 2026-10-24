@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { getSiteProfile } from '@/server/db/settings';
@@ -12,12 +16,12 @@ const [profile, summary] = await Promise.all([getSiteProfile(db), getSiteSummary
 const about = profile.about ? renderMarkdown(profile.about) : '';
 ---
 
-<BaseLayout title="关于" description={profile.bio} active="about">
-  <div class="rule-label">关于</div>
+<BaseLayout title={t("关于")} description={profile.bio} active="about">
+  <div class="rule-label">{t("关于")}</div>
 
   <section class="about-profile mt-6 grid gap-8 md:grid-cols-[11rem_minmax(0,1fr)] md:gap-10" data-motion>
     <div class="space-y-3">
-      {profile.avatar && <img src={profile.avatar} alt={`${profile.name} 的头像`} width={140} height={140} class="h-28 w-28 rounded-full border border-line object-cover" loading="lazy" />}
+      {profile.avatar && <img src={profile.avatar} alt={t("{0} 的头像", profile.name)} width={140} height={140} class="h-28 w-28 rounded-full border border-line object-cover" loading="lazy" />}
       <div>
         <h1 class="text-lg font-semibold tracking-tight">{profile.name}</h1>
         <p class="mt-1 text-sm leading-relaxed text-muted">{profile.bio}</p>
@@ -36,27 +40,27 @@ const about = profile.about ? renderMarkdown(profile.about) : '';
       {about ? (
         <div class="prose-editorial" data-convertible set:html={about} />
       ) : (
-        <p class="text-sm text-muted">博主还没有填写「关于我」的内容，可在后台「站点配置」中补充。</p>
+        <p class="text-sm text-muted">{t("博主还没有填写「关于我」的内容，可在后台「站点配置」中补充。")}</p>
       )}
     </div>
   </section>
 
-  <section class="mt-12" data-motion>
-    <div class="rule-label">站点数据</div>
+  <section class="about-ledger mt-12" data-motion>
+    <div class="rule-label">{t("站点数据")}</div>
     <dl class="mt-3 grid grid-cols-2 gap-x-8 sm:grid-cols-4">
       {[
-        { label: '文章', value: summary.postCount },
-        { label: '累计字数', value: summary.totalWords },
-        { label: '累计阅读', value: summary.totalViews },
-        { label: '评论 + 留言', value: summary.commentCount + summary.guestbookCount }
+        { label: t('文章'), value: summary.postCount },
+        { label: t('累计字数'), value: summary.totalWords },
+        { label: t('累计阅读'), value: summary.totalViews },
+        { label: t('评论 + 留言'), value: summary.commentCount + summary.guestbookCount }
       ].map((item) => (
         <div class="border-t border-line pt-3">
-          <dt class="text-xs text-muted">{item.label}</dt>
-          <dd class="mt-1 font-mono text-xl font-semibold tabular-nums">{formatNumber(item.value)}</dd>
+          <dt class="text-xs text-muted">{t(item.label)}</dt>
+          <dd class="mt-1 font-mono text-xl font-semibold tabular-nums">{formatNumber(item.value, locale)}</dd>
         </div>
       ))}
     </dl>
-    {profile.startedAt && <p class="mt-4 text-xs text-muted">站点自 {profile.startedAt} 开始记录。</p>}
+    {profile.startedAt && <p class="mt-4 text-xs text-muted">{t("自 {0} 开始记录。", profile.startedAt)}</p>}
   </section>
 
   <MermaidEnhancer />

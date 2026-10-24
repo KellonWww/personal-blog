@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import FormatWorkbench from '@/components/toolbox/FormatWorkbench';
 ---
-<ToolLayout title="文本格式化" description="整理 JSON、SQL、HTML、CSS 与常见代码文本。选择语言，按需排版。" active="/toolbox/format">
-  <FormatWorkbench client:load />
+<ToolLayout title={t("文本格式化")} description={t("整理 JSON、SQL、HTML、CSS 与常见代码文本。选择语言，按需排版。")} active="/toolbox/format">
+  <FormatWorkbench locale={locale} client:load />
 </ToolLayout>

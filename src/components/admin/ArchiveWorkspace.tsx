@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useRef, useState } from 'react';
 import { AdminRequestError, adminWrite, errorMessage } from '@/lib/admin-api';
 import { archiveRequest, downloadArchiveVersion } from '@/lib/archive-admin';
@@ -21,9 +22,10 @@ function editable(draft: Draft) {
   return { title: draft.title, content: draft.content, metadata: { categories: labels(draft.categories, 10), tags: labels(draft.tags, 20) } };
 }
 
-export default function ArchiveWorkspace({ archiveId, token, onDirtyChange, onBack }: {
+function ArchiveWorkspace({ archiveId, token, onDirtyChange, onBack }: {
   archiveId: string; token: string; onDirtyChange: (dirty: boolean) => void; onBack: () => void;
 }) {
+  const { t } = useI18n();
   const [archive, setArchive] = useState<ArchiveDetail | null>(null);
   const [source, setSource] = useState<ArchiveVersion | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -73,8 +75,8 @@ export default function ArchiveWorkspace({ archiveId, token, onDirtyChange, onBa
   }, [baseUrl, refresh]);
 
   function reload() {
-    if (publicationDirty) { window.alert('请先重试原发布确认请求，核对结果后再重新读取'); return; }
-    if (dirty && !window.confirm('重新加载会放弃未保存编辑。若上次请求结果不明，将以服务端现有版本为准，继续？')) { return; }
+    if (publicationDirty) { window.alert(t('请先重试原发布确认请求，核对结果后再重新读取')); return; }
+    if (dirty && !window.confirm(t('重新加载会放弃未保存编辑。若上次请求结果不明，将以服务端现有版本为准，继续？'))) { return; }
     setPending(null);
     setDraft(null);
     setRefresh((value) => value + 1);
@@ -109,7 +111,7 @@ export default function ArchiveWorkspace({ archiveId, token, onDirtyChange, onBa
   function mutate(kind: 'edit' | 'keep-local' | 'accept-source' | 'merge' | 'restore', targetVersionId?: string) {
     if (!archive || !draft || publicationDirty || busy || pending) { return; }
     if (kind === 'merge' && !merged) { setError('请先对照最新来源，并确认合并完成'); return; }
-    if (kind !== 'edit' && !window.confirm(kind === 'restore' ? '恢复会以所选历史快照追加新版本，当前未保存编辑将被放弃，来源冲突不会自动解决。继续？' : '确认解决冲突并接受当前最新来源作为新基线？未保存编辑仅在“提交合并”中生效。')) { return; }
+    if (kind !== 'edit' && !window.confirm(kind === 'restore' ? t('恢复会以所选历史快照追加新版本，当前未保存编辑将被放弃，来源冲突不会自动解决。继续？') : t('确认解决冲突并接受当前最新来源作为新基线？未保存编辑仅在“提交合并”中生效。'))) { return; }
     try {
       const body: Record<string, unknown> = { operationId: crypto.randomUUID(), expectedVersion: archive.version, expectedHead: archive.currentVersion.id, reason: draft.reason };
       if (kind === 'restore') { body.targetVersionId = targetVersionId; }
@@ -121,7 +123,7 @@ export default function ArchiveWorkspace({ archiveId, token, onDirtyChange, onBa
   }
   function createBlogDraft() {
     if (!archive || dirty || loading || lock.current) { return; }
-    if (!window.confirm('将已保存工作快照的标题与正文复制为私有博客草稿；不复制来源信息及私有分类标签。正文仍可能含私人信息或本地资源引用，后续必须从关联记录审阅确认，不会自动发布。确认转稿？')) { return; }
+    if (!window.confirm(t('将已保存工作快照的标题与正文复制为私有博客草稿；不复制来源信息及私有分类标签。正文仍可能含私人信息或本地资源引用，后续必须从关联记录审阅确认，不会自动发布。确认转稿？'))) { return; }
     void commit({ kind: 'blog-draft', url: baseUrl + '/blog-draft', method: 'POST', body: {
       operationId: crypto.randomUUID(), expectedVersion: archive.version, expectedHead: archive.currentVersion.id
     } });
@@ -134,49 +136,51 @@ export default function ArchiveWorkspace({ archiveId, token, onDirtyChange, onBa
     finally { if (alive.current) { setDownloading(false); } }
   }
   function leave() {
-    if (publicationDirty) { window.alert('发布确认结果待核对，请先重试原请求'); return; }
-    if (dirty && !window.confirm('当前有未保存修改或结果不明的请求，确认离开？')) { return; }
+    if (publicationDirty) { window.alert(t('发布确认结果待核对，请先重试原请求')); return; }
+    if (dirty && !window.confirm(t('当前有未保存修改或结果不明的请求，确认离开？'))) { return; }
     onDirtyChange(false);
     onBack();
   }
   return <>
-    <div className="archive-actions"><button type="button" className="btn" disabled={busy || publicationDirty} onClick={leave}>← 返回档案</button><button type="button" className="btn" disabled={busy || publicationDirty || loading} onClick={reload}>重新读取</button><span>档案私有 · 编辑/导入不发布 · 博客稿须单独确认</span></div>
-    {error && <div role="alert" className="admin-notice">{error}</div>}
-    {message && <p role="status" className="admin-notice">{message}</p>}
-    {pending && <div className="admin-notice" role="status"><span>请求结果待确认。已锁定原请求；重试不会重复执行同一操作。也可重新读取核对服务端版本与转稿记录。</span><button type="button" className="btn" disabled={busy} onClick={() => void commit(pending)}>{busy ? '提交中…' : '重试原请求'}</button></div>}
-    {loading ? <div role="status" className="admin-empty">正在读取档案与来源候选…</div> : archive && draft && <>
-      <div className="archive-note"><span>来源：{archive.sourceName}</span><span>工作快照 v{archive.currentVersion.sequence} · 事件序号 {archive.version}</span><span>{archive.conflictState === 'pending' ? '存在未解决来源冲突' : '无来源冲突'}</span></div>
-      <p className="archive-note">正文与来源候选均按纯文本显示，不渲染图片、HTML 或外部资源；编辑、恢复均不会自动解决冲突。</p>
+    <div className="archive-actions"><button type="button" className="btn" disabled={busy || publicationDirty} onClick={leave}>{t("← 返回档案")}</button><button type="button" className="btn" disabled={busy || publicationDirty || loading} onClick={reload}>{t("重新读取")}</button><span>{t("档案私有 · 编辑/导入不发布 · 博客稿须单独确认")}</span></div>
+    {error && <div role="alert" className="admin-notice">{t(error)}</div>}
+    {message && <p role="status" className="admin-notice">{t(message)}</p>}
+    {pending && <div className="admin-notice" role="status"><span>{t("请求结果待确认。已锁定原请求；重试不会重复执行同一操作。也可重新读取核对服务端版本与转稿记录。")}</span><button type="button" className="btn" disabled={busy} onClick={() => void commit(pending)}>{busy ? t('提交中…') : t('重试原请求')}</button></div>}
+    {loading ? <div role="status" className="admin-empty">{t("正在读取档案与来源候选…")}</div> : archive && draft && <>
+      <div className="archive-note"><span>{t("来源：")}{archive.sourceName}</span><span>{t("工作快照 v")}{archive.currentVersion.sequence}{t("· 事件序号")}{archive.version}</span><span>{archive.conflictState === 'pending' ? t('存在未解决来源冲突') : t('无来源冲突')}</span></div>
+      <p className="archive-note">{t("正文与来源候选均按纯文本显示，不渲染图片、HTML 或外部资源；编辑、恢复均不会自动解决冲突。")}</p>
       <form onSubmit={(event) => { event.preventDefault(); mutate('edit'); }}>
         <fieldset disabled={busy || publicationDirty || Boolean(pending)} className="archive-editor-grid">
           <section className="admin-panel archive-editor">
-            <label className="archive-label">标题<input className="field" required maxLength={200} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
-            <label className="archive-label">Markdown 正文<textarea className="field archive-text" maxLength={TEXT_LIMIT} value={draft.content} onChange={(event) => setDraft({ ...draft, content: event.target.value })} spellCheck={false} /></label>
-            <p className="archive-note">{draft.content.length} / {TEXT_LIMIT} 字符 · {dirty ? '有未保存修改' : '已保存'}</p>
+            <label className="archive-label">{t("标题")}<input className="field" required maxLength={200} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
+            <label className="archive-label">{t("Markdown 正文")}<textarea className="field archive-text" maxLength={TEXT_LIMIT} value={draft.content} onChange={(event) => setDraft({ ...draft, content: event.target.value })} spellCheck={false} /></label>
+            <p className="archive-note">{draft.content.length} / {TEXT_LIMIT}{t("字符 ·")}{dirty ? t('有未保存修改') : t('已保存')}</p>
           </section>
           <aside className="admin-panel archive-editor">
-            <label className="archive-label">私有分类（一行一项，最多 10 项）<textarea className="field" rows={4} value={draft.categories} onChange={(event) => setDraft({ ...draft, categories: event.target.value })} /></label>
-            <label className="archive-label">私有标签（一行一项，最多 20 项）<textarea className="field" rows={5} value={draft.tags} onChange={(event) => setDraft({ ...draft, tags: event.target.value })} /></label>
-            <label className="archive-label">本次变更原因<input className="field" maxLength={500} value={draft.reason} onChange={(event) => setDraft({ ...draft, reason: event.target.value })} placeholder="可选，写入不可变历史" /></label>
-            <button type="submit" className="btn btn-primary">{busy ? '提交中…' : '保存编辑 · 追加版本'}</button>
+            <label className="archive-label">{t("私有分类（一行一项，最多 10 项）")}<textarea className="field" rows={4} value={draft.categories} onChange={(event) => setDraft({ ...draft, categories: event.target.value })} /></label>
+            <label className="archive-label">{t("私有标签（一行一项，最多 20 项）")}<textarea className="field" rows={5} value={draft.tags} onChange={(event) => setDraft({ ...draft, tags: event.target.value })} /></label>
+            <label className="archive-label">{t("本次变更原因")}<input className="field" maxLength={500} value={draft.reason} onChange={(event) => setDraft({ ...draft, reason: event.target.value })} placeholder={t("可选，写入不可变历史")} /></label>
+            <button type="submit" className="btn btn-primary">{busy ? t('提交中…') : t('保存编辑 · 追加版本')}</button>
           </aside>
         </fieldset>
       </form>
       {archive.conflictState === 'pending' && <section className="admin-panel archive-section">
-        <h2>处理来源冲突</h2><p className="archive-note">保留本地：保留已保存工作快照；接受来源：采用下方来源快照；手工合并：采用编辑区内容。三种操作都会接受最新来源基线。</p>
-        {source ? <details><summary>查看最新来源候选 · v{source.sequence} · {source.title}</summary><p className="archive-note">分类：{source.metadata.categories.join('、') || '无'} · 标签：{source.metadata.tags.join('、') || '无'}</p><pre className="archive-plain">{source.content}</pre></details> : <p role="status">来源候选未读取成功，请重新读取后再处理。</p>}
-        <label className="archive-check"><input type="checkbox" checked={merged} disabled={busy || publicationDirty || Boolean(pending)} onChange={(event) => setMerged(event.target.checked)} />已对照最新来源，并在编辑区完成合并</label>
-        <div className="archive-actions"><button type="button" className="btn" disabled={busy || publicationDirty || Boolean(pending) || !source} onClick={() => mutate('keep-local')}>保留已保存本地</button><button type="button" className="btn" disabled={busy || publicationDirty || Boolean(pending) || !source} onClick={() => mutate('accept-source')}>接受来源</button><button type="button" className="btn btn-primary" disabled={busy || publicationDirty || Boolean(pending) || !source || !merged} onClick={() => mutate('merge')}>提交编辑区合并</button></div>
+        <h2>{t("处理来源冲突")}</h2><p className="archive-note">{t("保留本地：保留已保存工作快照；接受来源：采用下方来源快照；手工合并：采用编辑区内容。三种操作都会接受最新来源基线。")}</p>
+        {source ? <details><summary>{t("查看最新来源候选 · v")}{source.sequence} · {source.title}</summary><p className="archive-note">{t("分类：")}{source.metadata.categories.join('、') || t('无')}{t("· 标签：")}{source.metadata.tags.join('、') || t('无')}</p><pre className="archive-plain">{source.content}</pre></details> : <p role="status">{t("来源候选未读取成功，请重新读取后再处理。")}</p>}
+        <label className="archive-check"><input type="checkbox" checked={merged} disabled={busy || publicationDirty || Boolean(pending)} onChange={(event) => setMerged(event.target.checked)} />{t("已对照最新来源，并在编辑区完成合并")}</label>
+        <div className="archive-actions"><button type="button" className="btn" disabled={busy || publicationDirty || Boolean(pending) || !source} onClick={() => mutate('keep-local')}>{t("保留已保存本地")}</button><button type="button" className="btn" disabled={busy || publicationDirty || Boolean(pending) || !source} onClick={() => mutate('accept-source')}>{t("接受来源")}</button><button type="button" className="btn btn-primary" disabled={busy || publicationDirty || Boolean(pending) || !source || !merged} onClick={() => mutate('merge')}>{t("提交编辑区合并")}</button></div>
       </section>}
-      <div className="archive-actions"><button type="button" className="btn" disabled={downloading} onClick={() => void download()}>{downloading ? '导出中…' : '导出已保存工作快照'}</button><span>仅 Markdown 与元数据，不含附件，不是完整灾备。</span></div>
+      <div className="archive-actions"><button type="button" className="btn" disabled={downloading} onClick={() => void download()}>{downloading ? t('导出中…') : t('导出已保存工作快照')}</button><span>{t("仅 Markdown 与元数据，不含附件，不是完整灾备。")}</span></div>
       <section className="admin-panel archive-section">
-        <h2>主动转为博客草稿</h2>
-        <p className="archive-note">仅复制已保存标题与正文，不带来源、私有分类或标签。正文中的私人信息与资源链接不会自动清理；关联稿只能从下方记录审阅确认发布，普通文章入口禁止直接发布。</p>
-        <button type="button" className="btn" disabled={dirty || loading || archive.conflictState === 'pending'} onClick={createBlogDraft}>转为私有博客草稿</button>
-        {(dirty || archive.conflictState === 'pending') && <p className="archive-note">请先保存编辑、确认未知请求结果并解决来源冲突，再转稿。</p>}
+        <h2>{t("主动转为博客草稿")}</h2>
+        <p className="archive-note">{t("仅复制已保存标题与正文，不带来源、私有分类或标签。正文中的私人信息与资源链接不会自动清理；关联稿只能从下方记录审阅确认发布，普通文章入口禁止直接发布。")}</p>
+        <button type="button" className="btn" disabled={dirty || loading || archive.conflictState === 'pending'} onClick={createBlogDraft}>{t("转为私有博客草稿")}</button>
+        {(dirty || archive.conflictState === 'pending') && <p className="archive-note">{t("请先保存编辑、确认未知请求结果并解决来源冲突，再转稿。")}</p>}
       </section>
       <ArchiveDrafts key={refresh} archiveId={archiveId} token={token} disabled={editorDirty} onDirtyChange={setPublicationDirty} />
       <ArchiveHistory key={archive.version} archiveId={archiveId} currentVersion={archive.currentVersion} disabled={busy || publicationDirty || Boolean(pending)} onRestore={(id) => mutate('restore', id)} />
     </>}
   </>;
 }
+
+export default withLocale(ArchiveWorkspace);

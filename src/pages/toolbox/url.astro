@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import UrlWorkbench from '@/components/toolbox/UrlWorkbench';
 ---
-<ToolLayout title="URL 参数编辑" description="拆解、编辑与重组网址，保留重复参数，不访问目标网站。" active="/toolbox/url">
-  <UrlWorkbench client:load />
+<ToolLayout title={t("URL 参数编辑")} description={t("拆解、编辑与重组网址，保留重复参数，不访问目标网站。")} active="/toolbox/url">
+  <UrlWorkbench locale={locale} client:load />
 </ToolLayout>

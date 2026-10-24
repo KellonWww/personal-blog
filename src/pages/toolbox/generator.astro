@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import GeneratorWorkbench from '@/components/toolbox/GeneratorWorkbench';
 ---
-<ToolLayout title="安全生成器" description="生成 UUID、随机密码，或计算文本与本地文件的 SHA-256。" active="/toolbox/generator">
-  <GeneratorWorkbench client:load />
+<ToolLayout title={t("安全生成器")} description={t("生成 UUID、随机密码，或计算文本与本地文件的 SHA-256。")} active="/toolbox/generator">
+  <GeneratorWorkbench locale={locale} client:load />
 </ToolLayout>

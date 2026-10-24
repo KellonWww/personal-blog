@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import BaseLayout from './BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
 import '@/styles/toolbox.css';
@@ -8,11 +12,11 @@ interface Props { title: string; description: string; active: string }
 const { title, description, active } = Astro.props;
 
 ---
-<BaseLayout title={title} description={description} active="toolbox">
-  <a href="/toolbox" class="tool-back">← 返回工具箱</a>
-  <PageHeading title={title} description={description} meta="浏览器本地处理 · 不上传输入内容" />
-  <nav class="tool-nav" aria-label="切换工具">{tools.map((tool) => <a href={tool.href} aria-current={active === tool.href ? 'page' : undefined}><ToolIcon name={tool.icon} size="1.1rem" />{tool.name}</a>)}</nav>
-  <noscript><p class="tool-error">此工具需要 JavaScript 才能在浏览器中处理内容，请启用后重试。输入不会上传。</p></noscript>
+<BaseLayout title={t(title)} description={t(description)} active="toolbox">
+  <a href="/toolbox" class="tool-back">{t("← 返回工具箱")}</a>
+  <PageHeading title={t(title)} description={t(description)} meta={t("浏览器本地处理 · 不上传输入内容")} />
+  <nav class="tool-nav" aria-label={t("切换工具")}>{tools.map((tool) => <a href={tool.href} aria-current={active === tool.href ? 'page' : undefined}><ToolIcon name={tool.icon} size="1.1rem" />{t(tool.name)}</a>)}</nav>
+  <noscript><p class="tool-error">{t("此工具需要 JavaScript 才能在浏览器中处理内容，请启用后重试。输入不会上传。")}</p></noscript>
   <slot />
 </BaseLayout>
 

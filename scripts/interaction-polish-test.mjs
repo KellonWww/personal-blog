@@ -1,0 +1,72 @@
+import assert from 'node:assert/strict';
+import { pathToFileURL } from 'node:url';
+const { chromium } = await import(process.argv[2] ? pathToFileURL(process.argv[2]).href : 'playwright');
+const base = process.env.UI_TEST_BASE || 'http://127.0.0.1:4321';
+assert(['localhost', '127.0.0.1'].includes(new URL(base).hostname));
+const browser = await chromium.launch({ headless: true, ...(process.argv[3] ? { channel: process.argv[3] } : {}) });
+const page = await browser.newPage();
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
+const root = page.locator('html');
+const dialog = page.locator('#site-search-dialog');
+const waitTheme = id => page.waitForFunction(value => document.documentElement.dataset.theme === value && !document.documentElement.dataset.themeTransition, id);
+try {
+  await page.goto(base + '/about');
+  await page.waitForLoadState('networkidle');
+  const original = await root.getAttribute('data-theme');
+  const next = original === 'moye' ? 'dianqing' : 'moye';
+  await page.locator('.theme-picker-trigger').click();
+  await waitTheme(next);
+  assert.equal(await page.evaluate(() => localStorage.getItem('blog-theme')), next);
+  assert.equal(await page.getByRole('group', { name: '选择主题' }).count(), 0);
+  await page.locator('.theme-picker-trigger').focus();
+  await page.keyboard.press('Space');
+  await waitTheme(original);
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  assert.equal(await root.getAttribute('data-theme'), original);
+  const settings = page.getByRole('button', { name: '主题设置', exact: true });
+  await settings.click();
+  await page.getByRole('button', { name: /跟随系统/ }).click();
+  assert.equal(await page.evaluate(() => localStorage.getItem('blog-theme')), null);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await waitTheme('moye');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await waitTheme('dianqing');
+  await settings.focus();
+  await page.keyboard.press('ArrowDown');
+  await page.getByRole('group', { name: '选择主题' }).waitFor();
+  await page.keyboard.press('Escape');
+  assert(await settings.evaluate(el => el === document.activeElement));
+  // 连续点击仍应按次数切换，不被异步 View Transition 吞掉。
+  await page.locator('.theme-picker-trigger').evaluate(el => { el.click(); el.click(); el.click(); });
+  await waitTheme('moye');
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1));
+    await page.keyboard.press('Control+f');
+    await dialog.getByRole('searchbox').waitFor();
+    assert.match(await dialog.evaluate(el => window.getComputedStyle(el).animationName), /search-enter/);
+    await page.keyboard.press('Escape');
+    assert.equal(await dialog.getAttribute('data-state'), 'closing');
+    assert(await dialog.evaluate(el => el.open));
+    // 退出尚未完成时重新呼出，不允许旧定时器关掉新弹层。
+    await page.keyboard.press('Control+f');
+    await page.waitForTimeout(350);
+    assert(await dialog.evaluate(el => el.open));
+    assert.equal(await page.evaluate(() => document.documentElement.style.overflow), 'hidden');
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(() => !document.querySelector('#site-search-dialog').open);
+    assert.equal(await page.evaluate(() => document.documentElement.style.overflow), '');
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.keyboard.press('Control+f');
+  await dialog.waitFor();
+  assert.equal(await dialog.evaluate(el => window.getComputedStyle(el).animationName), 'none');
+  await page.keyboard.press('Escape');
+  assert.equal(await dialog.evaluate(el => el.open), false);
+  await page.locator('.theme-picker-trigger').click();
+  await waitTheme('dianqing');
+  assert.deepEqual(errors, []);
+  console.log('[interaction-polish] PASS: one-click and keyboard toggle, persistence, system preferences, settings, rapid toggles, animated close/reopen, scroll lock, 320–1440px and reduced motion');
+} finally { await browser.close(); }

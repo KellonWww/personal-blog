@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import QrWorkbench from '@/components/toolbox/QrWorkbench';
 ---
-<ToolLayout title="二维码生成" description="把文字或网址变成二维码，实时预览，下载 PNG 或 SVG。" active="/toolbox/qr">
-  <QrWorkbench client:load />
+<ToolLayout title={t("二维码生成")} description={t("把文字或网址变成二维码，实时预览，下载 PNG 或 SVG。")} active="/toolbox/qr">
+  <QrWorkbench locale={locale} client:load />
 </ToolLayout>

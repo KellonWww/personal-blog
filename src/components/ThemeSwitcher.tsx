@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useId, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Check } from '@/components/Icons';
@@ -74,11 +75,15 @@ function applyTheme(theme: ThemeDef, persist = true) {
   }
 }
 
-export default function ThemeSwitcher() {
+function ThemeSwitcher() {
+  const { t } = useI18n();
   const [current, setCurrent] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const settingsRef = useRef<HTMLButtonElement>(null);
+  const desiredTheme = useRef<string | null>(null);
+  const desiredSystem = useRef(false);
   const transitionRef = useRef<ViewTransitionLike | null>(null);
   const panelId = useId();
   const [system, setSystem] = useState(false);
@@ -92,12 +97,17 @@ export default function ThemeSwitcher() {
     function followSystem(event: MediaQueryListEvent) {
       if (storedThemeId()) return;
       const next = event.matches ? DEFAULT_DARK : DEFAULT_LIGHT;
+      desiredTheme.current = next.id;
       applyTheme(next, false);
       setCurrent(next.id);
     }
 
     media.addEventListener('change', followSystem);
-    return () => media.removeEventListener('change', followSystem);
+    return () => {
+      media.removeEventListener('change', followSystem);
+      transitionRef.current?.skipTransition();
+      delete document.documentElement.dataset.themeTransition;
+    };
   }, []);
 
   useEffect(() => {
@@ -111,7 +121,7 @@ export default function ThemeSwitcher() {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         setOpen(false);
-        triggerRef.current?.focus({ preventScroll: true });
+        settingsRef.current?.focus({ preventScroll: true });
       }
     }
 
@@ -125,7 +135,9 @@ export default function ThemeSwitcher() {
 
   function select(theme: ThemeDef, followSystem = false) {
     setOpen(false);
-    triggerRef.current?.focus({ preventScroll: true });
+    desiredTheme.current = theme.id;
+    desiredSystem.current = followSystem;
+    (open ? settingsRef : triggerRef).current?.focus({ preventScroll: true });
     setSystem(followSystem);
     if (followSystem) {
       try { localStorage.removeItem(STORAGE_KEY); } catch { /* 忽略存储异常 */ }
@@ -142,8 +154,9 @@ export default function ThemeSwitcher() {
 
     const commit = (withTransition: boolean) => {
       if (withTransition) root.dataset.themeTransition = 'true';
-      applyTheme(theme, !followSystem);
-      flushSync(() => setCurrent(theme.id));
+      const latest = themeById(desiredTheme.current ?? theme.id);
+      applyTheme(latest, !desiredSystem.current);
+      flushSync(() => setCurrent(latest.id));
     };
 
     const bounds = triggerRef.current?.getBoundingClientRect();
@@ -174,29 +187,31 @@ export default function ThemeSwitcher() {
     <div className="theme-picker" ref={rootRef} onBlur={(event) => {
       if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
     }}>
-      <button
-        type="button"
-        ref={triggerRef}
-        className="btn btn-ghost theme-picker-trigger"
-        aria-controls={open ? panelId : undefined}
-        aria-expanded={open}
-        aria-label={active ? `主题：${active.name}，点开切换` : '选择主题'}
-        title="切换主题"
-        onClick={() => setOpen((value) => !value)}
-        onKeyDown={(event) => {
-          if (event.key === 'ArrowDown') { event.preventDefault(); setOpen(true); }
-        }}
-      >
-        <span className="theme-dots" aria-hidden="true">
-          <i className="dot-surface" />
-          <i className="dot-ink" />
-          <i className="dot-accent" />
-        </span>
-        {active && <span className="hidden md:inline">{active.name}</span>}
-      </button>
+      <div className="theme-switch-actions">
+        <button
+          type="button"
+          ref={triggerRef}
+          className="btn btn-ghost theme-picker-trigger"
+          aria-label={active?.mode === 'dark' ? t('切换到日光主题') : t('切换到夜航主题')}
+          title={active?.mode === 'dark' ? t('切换到日光主题') : t('切换到夜航主题')}
+          onClick={() => select(themeById((desiredTheme.current ?? documentThemeId()) === 'moye' ? 'dianqing' : 'moye'))}
+        >
+          <svg className="theme-toggle-icon" data-mode={active?.mode ?? 'light'} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <g className="theme-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></g>
+            <path className="theme-moon" d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>
+          </svg>
+          {active && <span className="hidden md:inline">{t(active.name)}</span>}
+        </button>
+        <button type="button" ref={settingsRef} className="btn btn-ghost theme-settings-trigger"
+          aria-label={t("主题设置")} title={t("主题设置与跟随系统")} aria-controls={open ? panelId : undefined} aria-expanded={open}
+          onClick={() => setOpen(value => !value)}
+          onKeyDown={event => { if (event.key === 'ArrowDown') { event.preventDefault(); setOpen(true); } }}>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5"/></svg>
+        </button>
+      </div>
 
       {open && (
-        <div className="theme-panel" id={panelId} role="group" aria-label="选择主题" onKeyDown={(event) => {
+        <div className="theme-panel" id={panelId} role="group" aria-label={t("选择主题")} onKeyDown={(event) => {
           const keys = ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Home', 'End'];
           if (!keys.includes(event.key)) return;
           const options = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('button'));
@@ -206,22 +221,24 @@ export default function ThemeSwitcher() {
           event.preventDefault();
           options[next]?.focus();
         }}>
-          <p className="theme-group-label">花园的两种光线</p>
+          <p className="theme-group-label">{t("花园的两种光线")}</p>
           {THEMES.map((theme) => (
             <button key={theme.id} type="button" aria-pressed={theme.id === current}
               className="theme-option" onClick={() => select(theme)}>
               <span className="theme-dots" data-theme={theme.id} aria-hidden="true">
                 <i className="dot-surface" /><i className="dot-ink" /><i className="dot-accent" />
               </span>
-              <span>{theme.name}</span>
+              <span>{t(theme.name)}</span>
               <span className="theme-option-check" aria-hidden="true">{theme.id === current && <Check size={14} />}</span>
             </button>
           ))}
           <button type="button" className="theme-system" aria-pressed={system} onClick={() => select(
             window.matchMedia('(prefers-color-scheme: dark)').matches ? DEFAULT_DARK : DEFAULT_LIGHT, true
-          )}>跟随系统{system ? ' · 已开启' : ''}</button>
+          )}>{t("跟随系统")}{system ? t(' · 已开启') : ''}</button>
         </div>
       )}
     </div>
   );
 }
+
+export default withLocale(ThemeSwitcher);

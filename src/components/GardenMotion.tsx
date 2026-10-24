@@ -1,3 +1,4 @@
+import { withLocale } from '@/lib/i18n/react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -5,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /** 首页动效不接管导航；卸载和媒体条件变化时一并回收。 */
-export default function GardenMotion() {
+function GardenMotion() {
   useGSAP(() => {
     const garden = document.querySelector<HTMLElement>('[data-garden]');
     if (!garden) return;
@@ -99,3 +100,5 @@ export default function GardenMotion() {
   }, []);
   return null;
 }
+
+export default withLocale(GardenMotion);

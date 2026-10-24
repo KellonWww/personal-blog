@@ -1,4 +1,9 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
+import LanguageSwitcher from '@/components/LanguageSwitcher.astro';
 import ThemeSwitcher from '@/components/ThemeSwitcher.tsx';
 import ReadingTools from '@/components/ReadingTools.tsx';
 
@@ -22,53 +27,53 @@ const nav = [
 ];
 ---
 
-<header class="app-header sticky top-0 z-40 border-b border-line">
-  <div class="site-shell flex h-16 items-center gap-4">
+<header class="app-header sticky z-40">
+  <div class="header-inner flex items-center gap-4">
     <a href="/" class="flex shrink-0 items-center gap-1 text-[0.94rem] font-semibold tracking-tight">
       <span class="brand-mark"><svg viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M14.5 19.5C11.5 10.5 18 4.5 28 4C28 14 23.5 21 14.5 19.5Z" fill="currentColor"/><path d="M12.5 21C5.5 21 3.5 16 4 10C10.5 10.5 14 14 12.5 21Z" fill="currentColor" opacity=".6"/><path d="M10.5 28C12 21.5 17 14.5 23 9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M16 17.5 23 10" stroke="var(--surface)" stroke-width="1.5" stroke-linecap="round"/></svg></span>
       <span class="max-w-[11rem] truncate sm:max-w-none">{siteName}</span>
     </a>
 
-    <span class="hidden h-4 w-px bg-line lg:block" aria-hidden="true"></span>
 
-    <nav class="hidden items-center gap-5 lg:flex" aria-label="主导航">
+    <nav class="header-nav hidden items-center lg:flex" aria-label={t("主导航")}>
       {nav.map((item) => (
         <a
           href={item.href}
           class:list={['nav-item py-1 text-[0.82rem] transition-colors', item.key === active ? 'is-active' : '']}
           aria-current={item.key === active ? 'page' : undefined}
         >
-          {item.label}
+          {t(item.label)}
         </a>
       ))}
     </nav>
 
     <div class="ml-auto flex shrink-0 items-center gap-1">
-      {showReadingTools && <ReadingTools client:visible />}
-      <a href="/search" class="btn btn-ghost" aria-label="搜索" title="搜索">
+      {showReadingTools && <ReadingTools locale={locale} client:visible />}
+      <a href="/search" class="btn btn-ghost" data-open-search aria-label={t("搜索")} aria-haspopup="dialog" aria-controls="site-search-dialog" aria-keyshortcuts="Control+f Meta+f" title={t("站内搜索（Ctrl+F / ⌘F）")}>
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle cx="11" cy="11" r="7"></circle>
           <path d="m20 20-3.5-3.5"></path>
         </svg>
-        <span class="hidden md:inline">搜索</span>
+        <span class="hidden md:inline">{t("搜索")}</span><kbd class="search-shortcut hidden xl:inline" aria-hidden="true">Ctrl F</kbd>
       </a>
-      <ThemeSwitcher client:load />
+      <LanguageSwitcher />
+      <ThemeSwitcher locale={locale} client:load />
     </div>
   </div>
 
   <details class="mobile-menu border-t border-line lg:hidden">
     <summary class="site-shell flex cursor-pointer list-none items-center justify-between py-2 text-xs text-muted">
-      <span>目录 <span class="mobile-current">{nav.find((item) => item.key === active)?.label ?? '浏览'}</span></span>
+      <span>{t("目录")}<span class="mobile-current">{t(nav.find((item) => item.key === active)?.label) ?? t('浏览')}</span></span>
       <span class="plus text-accent" aria-hidden="true">＋</span>
     </summary>
-    <nav class="mobile-nav site-shell pb-4 pt-1" aria-label="移动端导航">
+    <nav class="mobile-nav site-shell pb-4 pt-1" aria-label={t("移动端导航")}>
       {nav.map((item) => (
         <a href={item.href} aria-current={item.key === active ? 'page' : undefined} class:list={['text-sm', item.key === active ? 'font-semibold text-accent' : 'text-muted']}>
-          {item.label}
+          {t(item.label)}
         </a>
       ))}
-      <a href="/social" class="text-sm text-muted">友人帐</a>
-      <a href="/admin" class="text-sm text-muted">后台</a>
+      <a href="/social" class="text-sm text-muted">{t("友人帐")}</a>
+      <a href="/admin" class="text-sm text-muted">{t("后台")}</a>
     </nav>
   </details>
 </header>

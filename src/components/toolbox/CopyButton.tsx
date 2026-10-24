@@ -1,6 +1,8 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useState } from 'react';
 
-export default function CopyButton({ text, label = '复制', disabled = false }: { text: string; label?: string; disabled?: boolean }) {
+function CopyButton({ text, label = '复制', disabled = false }: { text: string; label?: string; disabled?: boolean }) {
+  const { t } = useI18n();
   const [notice, setNotice] = useState<{ text: string; label: string } | null>(null);
   async function copy() {
     try {
@@ -11,5 +13,7 @@ export default function CopyButton({ text, label = '复制', disabled = false }:
     }
   }
   const feedback = notice?.text === text ? notice.label : '';
-  return <span className="tool-copy"><button type="button" className="btn btn-ghost" disabled={disabled} onClick={copy}>{label}</button><span role="status">{feedback}</span></span>;
+  return <span className="tool-copy"><button type="button" className="btn btn-ghost" disabled={disabled} onClick={copy}>{t(label)}</button><span role="status">{t(feedback)}</span></span>;
 }
+
+export default withLocale(CopyButton);

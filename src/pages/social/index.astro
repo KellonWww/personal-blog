@@ -1,6 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeading from '@/components/PageHeading.astro';
 import { getSiteSettings } from '@/server/db/settings';
 import { safeJsonParse } from '@/lib/format';
 
@@ -9,12 +14,12 @@ const settings = await getSiteSettings(db);
 const friends = safeJsonParse<Array<{ name: string; url: string; desc?: string }>>(settings['site.friends'] ?? '[]', []);
 ---
 
-<BaseLayout title="友人帐" description="友情链接">
-  <div class="rule-label">友人帐</div>
+<BaseLayout title={t("友人帐")} description={t("友情链接")}>
+  <PageHeading title={t("友人帐")} description={t("沿着链接，去朋友的花园坐坐。")} />
   {friends.length === 0 ? (
     <div class="mt-6 border-l-2 border-line pl-4 text-sm text-muted">
-      <p>还没有配置友链。</p>
-      <p class="mt-2 text-xs">在 D1 的 <code class="font-mono text-[0.8em]">site_settings</code> 中写入 <code class="font-mono text-[0.8em]">site.friends</code>（JSON 数组，字段 name / url / desc）即可展示。</p>
+      <p>{t("还没有配置友链。")}</p>
+      <p class="mt-2 text-xs">{t("在 D1 的")}<code class="font-mono text-[0.8em]">site_settings</code>{t("中写入")}<code class="font-mono text-[0.8em]">site.friends</code>{t("（JSON 数组，字段 name / url / desc）即可展示。")}</p>
     </div>
   ) : (
     <div class="mt-6 border-t border-line">

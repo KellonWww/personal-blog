@@ -1,13 +1,16 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
 import SearchApp from '@/components/SearchApp.tsx';
 ---
 
-<BaseLayout title="搜索" description="站内文章搜索">
-  <PageHeading title="检索花园" description="标题、摘要、标签、分类，想到什么就搜什么。" />
+<BaseLayout title={t("搜索")} description={t("站内文章搜索")}>
+  <PageHeading title={t("检索花园")} description={t("标题、摘要、标签、分类，想到什么就搜什么。")} />
 
   <div class="mt-8">
-    <SearchApp client:load />
+    <SearchApp locale={locale} client:load />
   </div>
 </BaseLayout>

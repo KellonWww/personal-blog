@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import type { PostSummary } from '@/types/domain';
 import { formatDate, readingTime } from '@/lib/format';
 import PostCover from '@/components/PostCover.astro';
@@ -11,7 +15,7 @@ interface Props {
 }
 
 const { post, order, featured = false, motion = false } = Astro.props;
-const date = formatDate(post.publishedAt ?? post.createdAt);
+const date = formatDate(post.publishedAt ?? post.createdAt, locale);
 const index = typeof order === 'number' ? String(order).padStart(2, '0') : null;
 const href = `/post/${post.slug}`;
 ---
@@ -19,9 +23,9 @@ const href = `/post/${post.slug}`;
 <article data-motion={motion || undefined} class:list={["article-row group", { "article-featured": featured }]}>
   <div class="index-rail">
     {index && <span class="article-number">{index}</span>}
-    {featured && <span class="article-fresh">最近更新</span>}
+    {featured && <span class="article-fresh">{t("最近更新")}</span>}
     <time datetime={post.publishedAt ?? post.createdAt} class="tabular-nums">{date}</time>
-    <p class="text-muted">{readingTime(post.wordCount)}</p>
+    <p class="text-muted">{readingTime(post.wordCount, locale)}</p>
   </div>
 
   <div class="flex items-start gap-4 sm:gap-5">
@@ -37,7 +41,7 @@ const href = `/post/${post.slug}`;
         {post.tags.slice(0, 3).map((tag) => (
           <a href={`/post?tag=${tag.slug}`} class="transition-colors hover:text-accent">#{tag.name}</a>
         ))}
-        <span class="ml-auto font-mono text-[0.7rem] tabular-nums">{post.viewCount} 阅读 · {post.commentCount} 评论</span>
+        <span class="ml-auto font-mono text-[0.7rem] tabular-nums">{t("{0} 阅读 · {1} 评论", post.viewCount, post.commentCount)}</span>
       </div>
     </div>
 

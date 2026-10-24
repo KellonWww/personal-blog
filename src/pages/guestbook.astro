@@ -1,4 +1,7 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
@@ -13,10 +16,10 @@ const total = items.reduce(function count(acc: number, item: GuestbookItem): num
 }, 0);
 ---
 
-<BaseLayout title="留言板" description="留言与交流" active="guestbook">
-  <PageHeading title="园中留言" description="路过也好，常来也好，留下一点你的声音。" />
-  <p class="mt-4 text-xs text-muted">留言经园主审核后展示，支持回复。</p>
+<BaseLayout title={t("留言板")} description={t("留言与交流")} active="guestbook">
+  <PageHeading title={t("园中留言")} description={t("路过也好，常来也好，留下一点你的声音。")} />
+  <p class="mt-4 text-xs text-muted">{t("留言经园主审核后展示，支持回复。")}</p>
   <div class="mt-8">
-    <GuestbookSection client:visible initialItems={items} initialTotal={total} />
+    <GuestbookSection locale={locale} client:visible initialItems={items} initialTotal={total} />
   </div>
 </BaseLayout>

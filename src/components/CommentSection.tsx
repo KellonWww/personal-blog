@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useMemo, useState } from 'react';
 import type { CommentItem, SessionUser } from '@/types/domain';
 
@@ -18,12 +19,13 @@ interface CommentPayload {
 }
 
 function Avatar({ src, name }: { src: string; name: string }) {
+  const { t } = useI18n();
   if (src) {
     return <img src={src} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full border border-line object-cover" loading="lazy" />;
   }
   return (
     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line bg-paper-soft text-xs font-medium text-accent">
-      {name.slice(0, 1) || '访'}
+      {name.slice(0, 1) || t('访')}
     </span>
   );
 }
@@ -35,6 +37,7 @@ function CommentNode({
   item: CommentItem;
   onReply: (id: string, name: string) => void;
 }) {
+  const { t } = useI18n();
   return (
     <li className="space-y-2">
       <div className="flex gap-3">
@@ -43,7 +46,7 @@ function CommentNode({
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
             <span className="font-medium text-ink">{item.userName}</span>
             <time>{item.createdAt}</time>
-            <button type="button" className="hover:text-accent" onClick={() => onReply(item.id, item.userName)}>回复</button>
+            <button type="button" className="hover:text-accent" onClick={() => onReply(item.id, item.userName)}>{t("回复")}</button>
           </div>
           <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{item.content}</p>
         </div>
@@ -59,7 +62,8 @@ function CommentNode({
   );
 }
 
-export default function CommentSection({ slug, initialComments, initialTotal }: Props) {
+function CommentSection({ slug, initialComments, initialTotal }: Props) {
+  const { t } = useI18n();
   const [comments, setComments] = useState<CommentItem[]>(initialComments);
   const [total, setTotal] = useState(initialTotal);
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -135,43 +139,41 @@ export default function CommentSection({ slug, initialComments, initialTotal }: 
   }
 
   return (
-    <section className="border-t border-line pt-8" aria-label="评论区">
+    <section className="border-t border-line pt-8" aria-label={t("评论区")}>
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-tight">评论 <span className="font-mono text-sm text-muted tabular-nums">{total}</span></h2>
-        {user ? <span className="text-xs text-muted">已登录：{user.displayName || user.username}</span> : <a href="/admin/login" className="text-xs text-accent">登录后评论</a>}
+        <h2 className="text-lg font-semibold tracking-tight">{t("评论")}<span className="font-mono text-sm text-muted tabular-nums">{total}</span></h2>
+        {user ? <span className="text-xs text-muted">{t("已登录：")}{user.displayName || user.username}</span> : <a href="/admin/login" className="text-xs text-accent">{t("登录后评论")}</a>}
       </div>
 
       {user ? (
         <form onSubmit={submit} className="mb-6 space-y-2">
           {parentId && (
             <div className="flex items-center gap-2 text-xs text-muted">
-              <span>正在回复 {parentName}</span>
-              <button type="button" className="text-accent" onClick={() => { setParentId(''); setParentName(''); }}>取消</button>
+              <span>{t("正在回复")}{parentName}</span>
+              <button type="button" className="text-accent" onClick={() => { setParentId(''); setParentName(''); }}>{t("取消")}</button>
             </div>
           )}
           <textarea
             className="field min-h-24 resize-y"
             value={content}
             onChange={(event) => setContent(event.target.value)}
-            placeholder={placeholder}
+            placeholder={t(placeholder)}
             maxLength={2000}
             required
           />
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted">{content.length}/2000</span>
-            <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? '提交中…' : '发表评论'}</button>
+            <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? t('提交中…') : t('发表评论')}</button>
           </div>
         </form>
       ) : (
-        <p className="mb-6 border-l-2 border-line pl-4 text-sm text-muted">
-          评论需要登录。生产环境使用 GitHub 登录，本地可前往 <a href="/admin/login" className="text-accent">登录页</a> 使用开发登录。
-        </p>
+        <p className="mb-6 border-l-2 border-line pl-4 text-sm text-muted">{t("评论需要登录。生产环境使用 GitHub 登录，本地可前往")}<a href="/admin/login" className="text-accent">{t("登录页")}</a>{t("使用开发登录。")}</p>
       )}
 
-      {message && <p className="mb-4 text-sm text-accent">{message}</p>}
+      {message && <p className="mb-4 text-sm text-accent">{t(message)}</p>}
 
       {comments.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted">还没有评论，来抢沙发。</p>
+        <p className="py-6 text-center text-sm text-muted">{t("还没有评论，来抢沙发。")}</p>
       ) : (
         <ul className="space-y-6">
           {comments.map((item) => (
@@ -191,3 +193,5 @@ export default function CommentSection({ slug, initialComments, initialTotal }: 
 }
 
 /* avoid-ai-design-ignore-file: SD5, SD4w — 计数读数用 mono 对齐数字；忽略误报 */
+
+export default withLocale(CommentSection);

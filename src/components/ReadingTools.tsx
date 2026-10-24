@@ -1,9 +1,11 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useRef, useState } from 'react';
 import { Languages, Maximize2, Minimize2, Printer } from '@/components/Icons';
 
 const SKIP_TAGS = new Set(['CODE', 'PRE', 'SCRIPT', 'STYLE', 'INPUT', 'TEXTAREA', 'SVG']);
 
-export default function ReadingTools() {
+function ReadingTools() {
+  const { t } = useI18n();
   const [fullscreen, setFullscreen] = useState(false);
   const [traditional, setTraditional] = useState(false);
   const originals = useRef(new Map<Text, string>());
@@ -52,7 +54,7 @@ export default function ReadingTools() {
       });
       originals.current.clear();
       setTraditional(false);
-      document.documentElement.lang = 'zh-CN';
+      root.setAttribute('lang', 'zh-CN');
       return;
     }
     const convert = await ensureConverter();
@@ -66,7 +68,7 @@ export default function ReadingTools() {
       text.nodeValue = convert(text.nodeValue);
     });
     setTraditional(true);
-    document.documentElement.lang = 'zh-Hant';
+    root.setAttribute('lang', 'zh-Hant');
   }
 
   async function toggleFullscreen() {
@@ -83,16 +85,18 @@ export default function ReadingTools() {
 
   return (
     <div className="flex items-center gap-1 no-print">
-      <button type="button" onClick={toggleTraditional} className="btn btn-ghost" aria-label="切换繁简" title="切换繁简">
+      <button type="button" onClick={toggleTraditional} className="btn btn-ghost" aria-label={t("切换繁简")} title={t("切换繁简")}>
         <Languages size={16} />
-        <span className="hidden md:inline">{traditional ? '简体' : '繁體'}</span>
+        <span className="hidden md:inline">{traditional ? t('简体') : t('繁體')}</span>
       </button>
-      <button type="button" onClick={toggleFullscreen} className="btn btn-ghost" aria-label="全屏阅读" title="全屏阅读">
+      <button type="button" onClick={toggleFullscreen} className="btn btn-ghost" aria-label={t("全屏阅读")} title={t("全屏阅读")}>
         {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
       </button>
-      <button type="button" onClick={() => window.print()} className="btn btn-ghost" aria-label="打印文章" title="打印文章">
+      <button type="button" onClick={() => window.print()} className="btn btn-ghost" aria-label={t("打印文章")} title={t("打印文章")}>
         <Printer size={16} />
       </button>
     </div>
   );
 }
+
+export default withLocale(ReadingTools);

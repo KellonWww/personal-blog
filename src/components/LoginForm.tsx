@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useState } from 'react';
 import { loginDestination } from '@/lib/auth-redirect';
 import type { SessionUser } from '@/types/domain';
@@ -9,7 +10,8 @@ interface Props {
   returnTo?: string;
 }
 
-export default function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }: Props) {
+function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }: Props) {
+  const { t } = useI18n();
   const destination = loginDestination(returnTo);
   const privateReading = destination !== '/admin';
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -54,36 +56,38 @@ export default function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }
   }
 
   if (checking) {
-    return <p className="text-sm text-muted">正在检查登录状态…</p>;
+    return <p className="text-sm text-muted">{t("正在检查登录状态…")}</p>;
   }
 
   if (user) {
     return (
       <div className="space-y-3">
-        <p className="text-sm">已登录为 <strong>{user.displayName || user.username}</strong>{user.role === 'admin' ? '（管理员）' : ''}</p>
+        <p className="text-sm">{t("已登录为")}<strong>{user.displayName || user.username}</strong>{user.role === 'admin' ? t('（管理员）') : ''}</p>
         {privateReading && user.role !== 'admin' ? (
-          <p role="alert" className="text-sm text-muted">当前账号没有管理员权限，无法阅读私人文库。请在后台退出后使用管理员账号登录。</p>
-        ) : <a href={destination} className="btn btn-primary">{privateReading ? '继续阅读' : '进入后台'}</a>}
-        {privateReading && user.role !== 'admin' && <a href="/admin" className="btn">前往后台</a>}
+          <p role="alert" className="text-sm text-muted">{t("当前账号没有管理员权限，无法阅读私人文库。请在后台退出后使用管理员账号登录。")}</p>
+        ) : <a href={destination} className="btn btn-primary">{privateReading ? t('继续阅读') : t('进入后台')}</a>}
+        {privateReading && user.role !== 'admin' && <a href="/admin" className="btn">{t("前往后台")}</a>}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {errorCode && errorText[errorCode] && <p className="text-sm text-accent">{errorText[errorCode]}</p>}
+      {errorCode && errorText[errorCode] && <p className="text-sm text-accent">{t(errorText[errorCode])}</p>}
       {oauthEnabled ? (
-        <a href={'/api/auth/login?' + new URLSearchParams({ returnTo: destination })} className="btn btn-primary w-full justify-center">使用 GitHub 登录</a>
+        <a href={'/api/auth/login?' + new URLSearchParams({ returnTo: destination })} className="btn btn-primary w-full justify-center">{t("使用 GitHub 登录")}</a>
       ) : (
-        <p className="border-l-2 border-accent-line pl-3 py-1 text-xs text-muted">GitHub OAuth 未配置，生产环境请补充 GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET。</p>
+        <p className="border-l-2 border-accent-line pl-3 py-1 text-xs text-muted">{t("GitHub OAuth 未配置，生产环境请补充 GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET。")}</p>
       )}
       {devMode && (
         <button type="button" onClick={devLogin} className="btn w-full justify-center" disabled={pending}>
-          {pending ? '登录中…' : '本地开发登录（管理员）'}
+          {pending ? t('登录中…') : t('本地开发登录（管理员）')}
         </button>
       )}
-      {!devMode && !oauthEnabled && <p className="text-sm text-muted">当前没有可用的登录方式。</p>}
-      {message && <p className="text-sm text-accent">{message}</p>}
+      {!devMode && !oauthEnabled && <p className="text-sm text-muted">{t("当前没有可用的登录方式。")}</p>}
+      {message && <p className="text-sm text-accent">{t(message)}</p>}
     </div>
   );
 }
+
+export default withLocale(LoginForm);

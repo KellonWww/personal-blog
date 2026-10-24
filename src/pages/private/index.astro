@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
@@ -28,53 +32,53 @@ function pageHref(page: number): string {
 }
 ---
 
-<BaseLayout title="私人文库" description="只属于你的阅读空间。" active="private-library">
+<BaseLayout title={t("私人文库")} description={t("只属于你的阅读空间。")} active="private-library">
   <meta slot="head" name="robots" content="noindex, nofollow, noarchive" />
-  <PageHeading title="私人文库" description="把留给自己的文字，放在这里慢慢读。" meta={result ? result.total + ' 份文档 · 仅自己可见' : '仅自己可见'} />
+  <PageHeading title={t("私人文库")} description={t("把留给自己的文字，放在这里慢慢读。")} meta={result ? result.total + t(' 份文档 · 仅自己可见') : t('仅自己可见')} />
   <div class="mt-6 grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1fr)_15rem]">
-    <section aria-label="私人文档">
+    <section aria-label={t("私人文档")}>
       <form class="flex flex-wrap items-center gap-2 border-b border-line pb-5" method="get" role="search" action="/private">
-        <label class="sr-only" for="private-query">搜索私人文档</label>
-        <input id="private-query" class="field min-w-0 flex-1" name="q" type="search" value={params.get('q') ?? ''} maxlength="200" placeholder="搜索标题、正文或代码…" />
-        <button class="btn" type="submit">搜索</button>
-        {params.get('q') && <a class="btn btn-ghost" href="/private">重置</a>}
+        <label class="sr-only" for="private-query">{t("搜索私人文档")}</label>
+        <input id="private-query" class="field min-w-0 flex-1" name="q" type="search" value={params.get('q') ?? ''} maxlength="200" placeholder={t("搜索标题、正文或代码…")} />
+        <button class="btn" type="submit">{t("搜索")}</button>
+        {params.get('q') && <a class="btn btn-ghost" href="/private">{t("重置")}</a>}
       </form>
-      {validationError && <p role="alert" class="border-b border-line py-5 text-sm text-muted">{validationError}。请调整搜索条件后重试。</p>}
+      {t(validationError) && <p role="alert" class="border-b border-line py-5 text-sm text-muted">{t(validationError)}{t("。请调整搜索条件后重试。")}</p>}
       {result && (result.items.length ? <div>{result.items.map((item) => (
         <article class="article-row group">
           <div class="index-rail">
-            <time datetime={item.updatedAt} class="tabular-nums">{formatDate(item.updatedAt)}</time>
-            <p class="text-muted">私人文档</p>
+            <time datetime={item.updatedAt} class="tabular-nums">{formatDate(item.updatedAt, locale)}</time>
+            <p class="text-muted">{t("私人文档")}</p>
           </div>
           <div class="min-w-0">
             <h2 class="article-title"><a href={'/private/' + encodeURIComponent(item.id)} class="transition-colors">{item.title}</a></h2>
             {item.snippet && <p class="article-summary line-clamp-2">{item.snippet}</p>}
             <div class="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted">
               <span>{item.sourceName}</span>
-              {item.conflictState === 'pending' && <span>有来源更新待核对 · 当前显示已保存版本</span>}
-              <a class="ml-auto hover:text-accent" href={'/private/' + encodeURIComponent(item.id)}>阅读全文</a>
+              {item.conflictState === 'pending' && <span>{t("有来源更新待核对 · 当前显示已保存版本")}</span>}
+              <a class="ml-auto hover:text-accent" href={'/private/' + encodeURIComponent(item.id)}>{t("阅读全文")}</a>
             </div>
           </div>
         </article>
       ))}</div> : <div class="border-b border-line py-12 text-sm text-muted">
-        <p>{search ? '没有找到匹配的文档，换个关键词试试。' : '文库还是空的，可先在后台把文章转存为私人档案。'}</p>
-        <a class="mt-4 inline-block text-accent" href={search ? '/private' : '/admin?view=archives'}>{search ? '查看全部文档' : '前往私人档案'}</a>
+        <p>{search ? t('没有找到匹配的文档，换个关键词试试。') : t('文库还是空的，可先在后台把文章转存为私人档案。')}</p>
+        <a class="mt-4 inline-block text-accent" href={search ? '/private' : '/admin?view=archives'}>{search ? t('查看全部文档') : t('前往私人档案')}</a>
       </div>)}
-      {result && totalPages > 1 && <nav class="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm" aria-label="私人文库分页">
-        {result.page > 1 && <a class="btn" href={pageHref(result.page - 1)}>上一页</a>}
-        <span class="px-2 text-muted">第 {result.page} / {totalPages} 页</span>
-        {result.page < totalPages && result.page < 10000 && <a class="btn" href={pageHref(result.page + 1)}>下一页</a>}
+      {result && totalPages > 1 && <nav class="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm" aria-label={t("私人文库分页")}>
+        {result.page > 1 && <a class="btn" href={pageHref(result.page - 1)}>{t("上一页")}</a>}
+        <span class="px-2 text-muted">{t("第 {0} / {1} 页", result.page, totalPages)}</span>
+        {result.page < totalPages && result.page < 10000 && <a class="btn" href={pageHref(result.page + 1)}>{t("下一页")}</a>}
       </nav>}
     </section>
     <aside class="space-y-6">
       <section>
-        <h2 class="rule-label">留给自己的空间</h2>
-        <p class="mt-3 text-sm leading-relaxed text-muted">这里与公开文章分开存放。只有管理员登录后才能阅读，不会出现在公开搜索、订阅或站点地图中。</p>
+        <h2 class="rule-label">{t("留给自己的空间")}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-muted">{t("这里与公开文章分开存放。只有管理员登录后才能阅读，不会出现在公开搜索、订阅或站点地图中。")}</p>
       </section>
       <section>
-        <h2 class="rule-label">整理文档</h2>
-        <p class="mt-3 text-sm leading-relaxed text-muted">想修改文字、核对来源更新或查看历史版本，回到后台继续整理。</p>
-        <a class="btn mt-4" href="/admin?view=archives">管理私人档案</a>
+        <h2 class="rule-label">{t("整理文档")}</h2>
+        <p class="mt-3 text-sm leading-relaxed text-muted">{t("想修改文字、核对来源更新或查看历史版本，回到后台继续整理。")}</p>
+        <a class="btn mt-4" href="/admin?view=archives">{t("管理私人档案")}</a>
       </section>
     </aside>
   </div>

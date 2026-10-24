@@ -1,7 +1,15 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+Astro.response.headers.set('Cache-Control', 'private, no-store');
+Astro.response.headers.set('Vary', 'Cookie');
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
+import LanguageSwitcher from '@/components/LanguageSwitcher.astro';
 import '@fontsource-variable/outfit';
 import '@/styles/globals.css';
 import '@/styles/admin.css';
+import '@/styles/studio.css';
 
 interface Props {
   title: string;
@@ -11,14 +19,14 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="zh-CN" class="scroll-smooth">
+<html lang={locale} class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} · 博客后台</title>
+    <title>{t(title)} · {t("博客后台")}</title>
     <meta name="robots" content="noindex,nofollow" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=leaf-1" />
-    <meta name="theme-color" content="#142126" />
+    <meta name="theme-color" content="#141b2d" />
     <script is:inline>
       (function () {
         var legacy = { light: 'dianqing', dark: 'moye', xuanzhi: 'moye', songyan: 'moye', taichen: 'dianqing', xingye: 'dianqing' };
@@ -33,11 +41,12 @@ const { title } = Astro.props;
         root.setAttribute('data-theme', id);
         root.classList.toggle('dark', id === 'moye');
         var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute('content', id === 'moye' ? '#142126' : '#f0ecdf');
+        if (meta) meta.setAttribute('content', id === 'moye' ? '#141b2d' : '#f4f0e7');
       })();
     </script>
   </head>
-  <body class="min-h-screen bg-surface text-ink">
+  <body class="admin-site min-h-screen bg-surface text-ink">
+    {Astro.url.pathname === "/admin/login" && <div class="admin-language"><LanguageSwitcher /></div>}
     <slot />
   </body>
 </html>

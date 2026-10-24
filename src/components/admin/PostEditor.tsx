@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PostDetail, PostStatus, SessionUser } from '@/types/domain';
 import { defaultCoverSvg } from '@/lib/default-cover';
@@ -24,7 +25,8 @@ function validBackup(value: unknown): value is Backup {
     [draft.categoryIds, draft.tagIds].every((ids) => Array.isArray(ids) && ids.every((id) => typeof id === 'string'));
 }
 
-export default function PostEditor({ postId }: Props) {
+function PostEditor({ postId }: Props) {
+  const { t } = useI18n();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [categories, setCategories] = useState<TaxonomyOption[]>([]);
   const [tags, setTags] = useState<TaxonomyOption[]>([]);
@@ -126,7 +128,7 @@ export default function PostEditor({ postId }: Props) {
     if (!user || !ready || lock.current || uploadLock.current) return;
     if (backup) { setError('请先恢复或丢弃本地备份，再保存文章'); return; }
     if (!draft.title.trim() || !draft.content.trim()) { setError('标题和正文不能为空'); return; }
-    if (draft.status === 'published' && nextStatus === 'draft' && !window.confirm('保存为草稿会下线当前已发布文章，确认继续？')) return;
+    if (draft.status === 'published' && nextStatus === 'draft' && !window.confirm(t('保存为草稿会下线当前已发布文章，确认继续？'))) return;
     lock.current = true; setSaving(true); setMessage(''); setError('');
     try {
       const submitted = { ...draft, status: nextStatus };
@@ -179,34 +181,36 @@ export default function PostEditor({ postId }: Props) {
   }
   function resolveBackup(restore: boolean) {
     if (!backup) return;
-    if (!restore && !window.confirm('确认丢弃本机未保存的备份？')) return;
+    if (!restore && !window.confirm(t('确认丢弃本机未保存的备份？'))) return;
     if (restore) { setDraft(backup.draft); setMessage('已恢复到编辑器，请核对后手动保存；线上文章未被修改'); }
     else { try { localStorage.removeItem(storageKey); } catch { setBackupStatus('旧备份未能清除'); } }
     setBackup(null);
   }
 
-  return <AdminShell active="posts" title={postId ? '编辑文章' : '新的记录'} description="专心写作。修改自动备份到本机，发布始终由你决定。" userName={user?.displayName || user?.username} actions={ready && <><button type="button" className="btn" disabled={saving || uploading || !!backup} onClick={() => save('draft')}>保存草稿</button><button type="button" className="btn btn-primary" disabled={saving || uploading || !!backup} onClick={() => save('published')}>{saving ? '保存中…' : draft.status === 'published' ? '更新文章' : '发布文章'}</button></>}>
-    {error && <div role="alert" className="admin-notice"><span>{error}</span>{!ready && <button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>重试</button>}</div>}
-    {message && <p role="status" className="admin-notice">{message}</p>}
-    {!ready ? <div role="status" className="admin-empty">{error ? '编辑器未就绪，请重试。' : '正在准备编辑器…'}</div> : <>
-      {backup && <div className="admin-notice"><div>发现本机未保存备份（{new Date(backup.savedAt).toLocaleString('zh-CN')}）。<p className="text-xs text-muted">可能早于线上版本，恢复仅替换编辑内容，不会自动发布。</p></div><div className="flex shrink-0 gap-2"><button type="button" className="btn" onClick={() => resolveBackup(true)}>恢复备份</button><button type="button" className="btn btn-ghost" onClick={() => resolveBackup(false)}>丢弃</button></div></div>}
+  return <AdminShell active="posts" title={postId ? t('编辑文章') : t('新的记录')} description={t("专心写作。修改自动备份到本机，发布始终由你决定。")} userName={user?.displayName || user?.username} actions={ready && <><button type="button" className="btn" disabled={saving || uploading || !!backup} onClick={() => save('draft')}>{t("保存草稿")}</button><button type="button" className="btn btn-primary" disabled={saving || uploading || !!backup} onClick={() => save('published')}>{saving ? t('保存中…') : draft.status === 'published' ? t('更新文章') : t('发布文章')}</button></>}>
+    {error && <div role="alert" className="admin-notice"><span>{t(error)}</span>{!ready && <button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>{t("重试")}</button>}</div>}
+    {message && <p role="status" className="admin-notice">{t(message)}</p>}
+    {!ready ? <div role="status" className="admin-empty">{t(error) ? t('编辑器未就绪，请重试。') : t('正在准备编辑器…')}</div> : <>
+      {backup && <div className="admin-notice"><div>{t("发现本机未保存备份（")}{new Date(backup.savedAt).toLocaleString('zh-CN')}）。<p className="text-xs text-muted">{t("可能早于线上版本，恢复仅替换编辑内容，不会自动发布。")}</p></div><div className="flex shrink-0 gap-2"><button type="button" className="btn" onClick={() => resolveBackup(true)}>{t("恢复备份")}</button><button type="button" className="btn btn-ghost" onClick={() => resolveBackup(false)}>{t("丢弃")}</button></div></div>}
       <input ref={fileRef} type="file" hidden accept="image/jpeg,image/png,image/webp,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file, uploadTarget.current); }} />
       <fieldset disabled={saving || uploading || !!backup} className="admin-editor-layout">
         <section className="admin-panel">
-          <input className="admin-editor-title" aria-label="文章标题" value={draft.title} onChange={(event) => update('title', event.target.value)} placeholder="给这篇记录起个名字…" maxLength={200} />
-          <div className="admin-editor-toolbar"><button type="button" onClick={() => { setMode('edit'); insert('**', '**'); }} aria-label="插入粗体"><strong>B</strong></button><button type="button" onClick={() => { setMode('edit'); insert('## ', '', '标题'); }}>H2</button><button type="button" onClick={() => { setMode('edit'); insert('- ', '', '列表项'); }}>列表</button><button type="button" onClick={() => { setMode('edit'); insert('```\n', '\n```', '代码'); }}>代码</button><button type="button" onClick={() => { setMode('edit'); insert('[', '](https://)', '链接文字'); }}>链接</button><button type="button" disabled={uploading} onClick={() => { uploadTarget.current = 'body'; fileRef.current?.click(); }}>{uploading ? '上传中…' : '图片'}</button><div className="ml-auto flex gap-1">{(['edit', 'split', 'preview'] as const).map((value) => <button type="button" key={value} aria-pressed={mode === value} onClick={() => setMode(value)}>{({ edit: '编辑', split: '分栏', preview: '预览' })[value]}</button>)}</div></div>
+          <input className="admin-editor-title" aria-label={t("文章标题")} value={draft.title} onChange={(event) => update('title', event.target.value)} placeholder={t("给这篇记录起个名字…")} maxLength={200} />
+          <div className="admin-editor-toolbar"><button type="button" onClick={() => { setMode('edit'); insert('**', '**'); }} aria-label={t("插入粗体")}><strong>B</strong></button><button type="button" onClick={() => { setMode('edit'); insert('## ', '', '标题'); }}>H2</button><button type="button" onClick={() => { setMode('edit'); insert('- ', '', '列表项'); }}>{t("列表")}</button><button type="button" onClick={() => { setMode('edit'); insert('```\n', '\n```', '代码'); }}>{t("代码")}</button><button type="button" onClick={() => { setMode('edit'); insert('[', '](https://)', '链接文字'); }}>{t("链接")}</button><button type="button" disabled={uploading} onClick={() => { uploadTarget.current = 'body'; fileRef.current?.click(); }}>{uploading ? t('上传中…') : t('图片')}</button><div className="ml-auto flex gap-1">{(['edit', 'split', 'preview'] as const).map((value) => <button type="button" key={value} aria-pressed={mode === value} onClick={() => setMode(value)}>{({ edit: t('编辑'), split: t('分栏'), preview: t('预览') })[value]}</button>)}</div></div>
           <div className="admin-editor-content" data-mode={mode}>
-            {mode !== 'preview' && <textarea ref={textareaRef} className="admin-editor-textarea" aria-label="Markdown 正文" value={draft.content} onChange={(event) => update('content', event.target.value)} onPaste={(event) => { const image = Array.from(event.clipboardData.files).find((file) => file.type.startsWith('image/')); if (image) { event.preventDefault(); void upload(image, 'body'); } }} placeholder="用 Markdown 写下你的记录，支持粘贴图片…" />}
-            {mode !== 'edit' && <div ref={previewRef} className="admin-editor-preview prose-editorial" dangerouslySetInnerHTML={{ __html: rendered || '<p>正文预览将在这里呈现。</p>' }} />}
+            {mode !== 'preview' && <textarea ref={textareaRef} className="admin-editor-textarea" aria-label={t("Markdown 正文")} value={draft.content} onChange={(event) => update('content', event.target.value)} onPaste={(event) => { const image = Array.from(event.clipboardData.files).find((file) => file.type.startsWith('image/')); if (image) { event.preventDefault(); void upload(image, 'body'); } }} placeholder={t("用 Markdown 写下你的记录，支持粘贴图片…")} />}
+            {mode !== 'edit' && <div ref={previewRef} className="admin-editor-preview prose-editorial" dangerouslySetInnerHTML={{ __html: rendered || t('<p>正文预览将在这里呈现。</p>') }} />}
           </div>
-          <div className="admin-editor-bottom"><span>{countWords(draft.content)} 字 · Ctrl / ⌘ + S 保存当前状态</span><span role="status">{dirty ? backupStatus || '有未保存修改' : '与服务端同步'}</span></div>
+          <div className="admin-editor-bottom"><span>{t("{0} 字 · Ctrl / ⌘ + S 保存当前状态", countWords(draft.content))}</span><span role="status">{dirty ? backupStatus || t('有未保存修改') : t('与服务端同步')}</span></div>
         </section>
         <aside className="admin-editor-aside">
-          <section className="admin-panel"><h2>发布信息 <span className="admin-status ml-2" data-status={draft.status}>{draft.status === 'published' ? '已发布' : '草稿'}</span></h2><label htmlFor="post-slug" className="admin-field-label">文章路径</label><input id="post-slug" className="field" value={draft.slug} onChange={(event) => update('slug', event.target.value)} placeholder="留空自动生成" maxLength={80} /><label htmlFor="post-summary" className="admin-field-label mt-4">摘要</label><textarea id="post-summary" className="field min-h-28" value={draft.summary} onChange={(event) => update('summary', event.target.value)} maxLength={500} placeholder="一句话介绍这篇文章…" /><span className="admin-field-help">用于文章列表与 SEO · {draft.summary.length}/500</span></section>
-          <section className="admin-panel"><h2>文章封面</h2><div className="overflow-hidden rounded-[var(--radius-control)] border border-line mb-3">{draft.coverImage.trim() ? <img src={draft.coverImage} alt="封面预览" className="aspect-[16/9] w-full object-cover" /> : <span className="block aspect-[16/9] w-full" aria-hidden="true" dangerouslySetInnerHTML={{ __html: defaultCoverSvg(draft.title) }} />}</div><input className="field" aria-label="封面图片地址" value={draft.coverImage} onChange={(event) => update('coverImage', event.target.value)} placeholder="图片地址，留空用默认封面" maxLength={500} /><button type="button" className="btn mt-3 w-full" disabled={uploading} onClick={() => { uploadTarget.current = 'cover'; fileRef.current?.click(); }}>上传封面</button><span className="admin-field-help">JPG / PNG / WebP / GIF · 最大 5MB</span></section>
-          {([{ key: 'categoryIds', label: '分类', items: categories }, { key: 'tagIds', label: '标签', items: tags }] as const).map(({ key, label, items }) => <section className="admin-panel" key={key}><h2>{label}</h2><div className="admin-chip-list">{items.map((item) => <button type="button" className={`chip ${draft[key].includes(item.id) ? 'border-accent text-accent bg-accent-soft' : ''}`} aria-pressed={draft[key].includes(item.id)} key={item.id} onClick={() => update(key, draft[key].includes(item.id) ? draft[key].filter((id) => id !== item.id) : [...draft[key], item.id])}>{item.name}</button>)}{!items.length && <span className="text-xs text-muted">暂无{label}</span>}</div></section>)}
+          <section className="admin-panel"><h2>{t("发布信息")}<span className="admin-status ml-2" data-status={draft.status}>{draft.status === 'published' ? t('已发布') : t('草稿')}</span></h2><label htmlFor="post-slug" className="admin-field-label">{t("文章路径")}</label><input id="post-slug" className="field" value={draft.slug} onChange={(event) => update('slug', event.target.value)} placeholder={t("留空自动生成")} maxLength={80} /><label htmlFor="post-summary" className="admin-field-label mt-4">{t("摘要")}</label><textarea id="post-summary" className="field min-h-28" value={draft.summary} onChange={(event) => update('summary', event.target.value)} maxLength={500} placeholder={t("一句话介绍这篇文章…")} /><span className="admin-field-help">{t("用于文章列表与 SEO ·")}{draft.summary.length}/500</span></section>
+          <section className="admin-panel"><h2>{t("文章封面")}</h2><div className="overflow-hidden rounded-[var(--radius-control)] border border-line mb-3">{draft.coverImage.trim() ? <img src={draft.coverImage} alt={t("封面预览")} className="aspect-[16/9] w-full object-cover" /> : <span className="block aspect-[16/9] w-full" aria-hidden="true" dangerouslySetInnerHTML={{ __html: defaultCoverSvg(draft.title) }} />}</div><input className="field" aria-label={t("封面图片地址")} value={draft.coverImage} onChange={(event) => update('coverImage', event.target.value)} placeholder={t("图片地址，留空用默认封面")} maxLength={500} /><button type="button" className="btn mt-3 w-full" disabled={uploading} onClick={() => { uploadTarget.current = 'cover'; fileRef.current?.click(); }}>{t("上传封面")}</button><span className="admin-field-help">{t("JPG / PNG / WebP / GIF · 最大 5MB")}</span></section>
+          {([{ key: 'categoryIds', label: t('分类'), items: categories }, { key: 'tagIds', label: t('标签'), items: tags }] as const).map(({ key, label, items }) => <section className="admin-panel" key={key}><h2>{t(label)}</h2><div className="admin-chip-list">{items.map((item) => <button type="button" className={`chip ${draft[key].includes(item.id) ? 'border-accent text-accent bg-accent-soft' : ''}`} aria-pressed={draft[key].includes(item.id)} key={item.id} onClick={() => update(key, draft[key].includes(item.id) ? draft[key].filter((id) => id !== item.id) : [...draft[key], item.id])}>{item.name}</button>)}{!items.length && <span className="text-xs text-muted">{t("暂无")}{t(label)}</span>}</div></section>)}
         </aside>
       </fieldset>
     </>}
   </AdminShell>;
 }
+
+export default withLocale(PostEditor);

@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ------------------------------------------------------------------
-   庭园索引 —— 冷暖底色 + 鲜明撞色 + 极简索引
+   雾林手记 —— 互补撞色、透光界面、清晰阅读
    改色/改字/改动效前先读 DESIGN.md
    ------------------------------------------------------------------ */
 
@@ -13,36 +13,44 @@
   --radius-pill: 999px;
 }
 
-/* 夜航：冷暗石墨 + 酸橙；日光：暖纸色 + 钴蓝。 */
+/* 保留主题 ID 与持久化兼容；深色墨蓝／酸橙，浅色奶油／钴蓝，浅色副色为青柠，深色副色为冰川青。 */
 :root,
 [data-theme="moye"],
 html.dark:not([data-theme]) {
   color-scheme: dark;
-  --surface: #142126;
-  --paper: #1b2b31;
-  --paper-soft: #25373e;
-  --line: #35494f;
-  --line-strong: #61777d;
-  --ink: #edf2e8;
-  --muted: #b0c0c3;
-  --accent: #d5f578;
-  --accent-soft: #334329;
-  --accent-line: #93b252;
-  --accent-ink: #192519;
+  --surface: #141b2d;
+  --paper: #1c2740;
+  --paper-soft: #293650;
+  --line: #394964;
+  --line-strong: #7f91b0;
+  --ink: #f5f3e8;
+  --muted: #b7c3d9;
+  --accent: #dcf578;
+  --accent-soft: #344321;
+  --accent-line: #90a84b;
+  --accent-ink: #1a2411;
+  --secondary: #85d9cf;
+  --secondary-ink: #25243f;
+  --secondary-text: #a0e8df;
+  --secondary-soft: #203b40;
 }
 [data-theme="dianqing"] {
   color-scheme: light;
-  --surface: #f0ecdf;
-  --paper: #f8f5eb;
-  --paper-soft: #e4dfd0;
-  --line: #cac4b5;
-  --line-strong: #948e7e;
-  --ink: #292d28;
-  --muted: #5b6259;
-  --accent: #284ab3;
-  --accent-soft: #dde2f2;
-  --accent-line: #6b81c3;
-  --accent-ink: #f9fafc;
+  --surface: #f4f0e7;
+  --paper: #fffcf5;
+  --paper-soft: #eae5d9;
+  --line: #d8d3c8;
+  --line-strong: #878b9b;
+  --ink: #202b48;
+  --muted: #59617a;
+  --accent: #304bc2;
+  --accent-soft: #e5e9ff;
+  --accent-line: #7a8edb;
+  --accent-ink: #fffdf6;
+  --secondary: #d8ec83;
+  --secondary-ink: #25243f;
+  --secondary-text: #536722;
+  --secondary-soft: #edf1d9;
 }
 
 :root {
@@ -126,7 +134,7 @@ html.dark:not([data-theme]) {
 @layer components {
   .site-shell {
     width: calc(100% - clamp(2rem, 6vw, 7rem));
-    max-width: 100rem;
+    max-width: 88rem;
     margin-inline: auto;
   }
   .garden-content .rule-label::before,

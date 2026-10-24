@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useRef, useState } from 'react';
 import type { SessionUser } from '@/types/domain';
 import { adminRequest, adminWrite, errorMessage } from '@/lib/admin-api';
@@ -16,7 +17,8 @@ const DESCRIPTIONS: Record<AdminView, string> = {
   settings: '维护站点资料，让花园保持自己的样子。'
 };
 
-export default function AdminDashboard() {
+function AdminDashboard() {
+  const { t } = useI18n();
   const [user, setUser] = useState<SessionUser | null>(null);
   const [view, setView] = useState<AdminView>('overview');
   const [error, setError] = useState('');
@@ -33,7 +35,7 @@ export default function AdminDashboard() {
     function syncView() {
       const next = new URLSearchParams(window.location.search).get('view');
       const nextView = ADMIN_NAV.find((item) => item.key === next)?.key ?? 'overview';
-      if (dirtyRef.current && nextView !== viewRef.current && !window.confirm('当前页面有未保存修改，确认离开？')) {
+      if (dirtyRef.current && nextView !== viewRef.current && !window.confirm(t('当前页面有未保存修改，确认离开？'))) {
         const url = new URL(window.location.href);
         url.searchParams.set('view', viewRef.current);
         window.history.replaceState(null, '', url);
@@ -63,7 +65,7 @@ export default function AdminDashboard() {
 
   function navigate(next: AdminView) {
     if (next === view) return;
-    if (workspaceDirty && !window.confirm('当前页面有未保存修改，确认离开？')) return;
+    if (workspaceDirty && !window.confirm(t('当前页面有未保存修改，确认离开？'))) return;
     setWorkspaceDirty(false);
     setView(next);
     const url = new URL(window.location.href);
@@ -72,7 +74,7 @@ export default function AdminDashboard() {
   }
 
   async function logout() {
-    if (workspaceDirty && !window.confirm('当前页面有未保存修改，确认退出？')) return;
+    if (workspaceDirty && !window.confirm(t('当前页面有未保存修改，确认退出？'))) return;
     setLoggingOut(true);
     try {
       await adminRequest('/api/auth/logout', adminWrite(user?.csrfToken ?? '', 'POST'));
@@ -82,9 +84,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <AdminShell active={view} title={ADMIN_NAV.find((item) => item.key === view)?.label ?? '工作台'} description={DESCRIPTIONS[view]} userName={user?.displayName || user?.username} onNavigate={navigate} onLogout={loggingOut ? undefined : logout} actions={<>{view === 'archives' && <a href="/private" className="btn">前台阅读 ↗</a>}<a href="/admin/editor" className="btn btn-primary">＋ 写文章</a></>}>
-      {error && <div role="alert" className="admin-notice"><span>{error}</span><button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>重试</button></div>}
-      {loading ? <div role="status" className="admin-empty">正在加载管理空间…</div> : user && <>
+    <AdminShell active={view} title={t(ADMIN_NAV.find((item) => item.key === view)?.label) ?? t('工作台')} description={DESCRIPTIONS[view]} userName={user?.displayName || user?.username} onNavigate={navigate} onLogout={loggingOut ? undefined : logout} actions={<>{view === 'archives' && <a href="/private" className="btn">{t("前台阅读 ↗")}</a>}<a href="/admin/editor" className="btn btn-primary">{t("＋ 写文章")}</a></>}>
+      {error && <div role="alert" className="admin-notice"><span>{t(error)}</span><button type="button" className="btn" onClick={() => setRetry((value) => value + 1)}>{t("重试")}</button></div>}
+      {loading ? <div role="status" className="admin-empty">{t("正在加载管理空间…")}</div> : user && <>
         {view === 'overview' && <AdminOverview onNavigate={navigate} />}
         {view === 'posts' && <PostManager token={user.csrfToken} />}
         {view === 'archives' && <ArchiveManager token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
@@ -94,3 +96,5 @@ export default function AdminDashboard() {
     </AdminShell>
   );
 }
+
+export default withLocale(AdminDashboard);

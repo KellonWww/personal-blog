@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
 import ToolIcon from '@/components/toolbox/ToolIcon.astro';
@@ -7,14 +11,14 @@ import { tools } from '@/lib/tool-definitions';
 
 ---
 
-<BaseLayout title="工具箱" description="常用工具入口" active="toolbox">
-  <PageHeading title="手边的工具" description="写作、查找、整理。把日常用得上的入口，放在顺手的地方。" />
+<BaseLayout title={t("工具箱")} description={t("常用工具入口")} active="toolbox">
+  <PageHeading title={t("手边的工具")} description={t("写作、查找、整理。把日常用得上的入口，放在顺手的地方。")} />
   <div class="tool-shelf">
     {tools.map((tool) => (
       <section class="tool-entry" data-ready={tool.ready} data-motion>
-        <div class="tool-entry-heading"><h2><ToolIcon name={tool.icon} size="1.15em" />{tool.name}</h2><span>{tool.ready ? '可用' : '规划中'}</span></div>
-        <p>{tool.desc}</p>
-        {tool.ready && tool.href ? <a href={tool.href} class="tool-open">打开{tool.name}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" stroke-width="1.5" /></svg></a> : <span class="tool-planned">尚未实现，暂不开放</span>}
+        <div class="tool-entry-heading"><h2><ToolIcon name={tool.icon} size="1.15em" />{t(tool.name)}</h2><span>{tool.ready ? t('可用') : t('规划中')}</span></div>
+        <p>{t(tool.desc)}</p>
+        {tool.ready && tool.href ? <a href={tool.href} class="tool-open">{t("打开")} {t(tool.name)}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" stroke-width="1.5" /></svg></a> : <span class="tool-planned">{t("尚未实现，暂不开放")}</span>}
       </section>
     ))}
   </div>

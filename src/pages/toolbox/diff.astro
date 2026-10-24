@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import TextDiff from '@/components/toolbox/TextDiff';
 ---
-<ToolLayout title="文本 Diff" description="两段文本并排放，增删改动逐行看。适合核对配置、接口回传和文章草稿。" active="/toolbox/diff">
-  <TextDiff client:load />
+<ToolLayout title={t("文本 Diff")} description={t("两段文本并排放，增删改动逐行看。适合核对配置、接口回传和文章草稿。")} active="/toolbox/diff">
+  <TextDiff locale={locale} client:load />
 </ToolLayout>

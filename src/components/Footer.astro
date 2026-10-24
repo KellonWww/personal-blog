@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 interface Props {
   siteName: string;
   icp?: string;
@@ -10,20 +14,20 @@ const { siteName, icp = '', startedAt = '', socialLinks = [] } = Astro.props;
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-20 border-t border-line">
+<footer class="site-footer mt-20 border-t border-line">
   <div class="site-shell flex flex-col gap-4 py-8 text-xs text-muted md:flex-row md:items-baseline md:justify-between">
     <div class="space-y-1">
       <p class="font-mono tabular-nums">© {startedAt && startedAt.slice(0, 4) !== String(year) ? `${startedAt.slice(0, 4)}–` : ''}{year}</p>
-      <p>{siteName}{icp ? ` · ${icp}` : ''}</p>
+      <p class="footer-name">{siteName}{icp ? ` · ${icp}` : ''}</p>
     </div>
     <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
       {socialLinks.map((link) => (
         <a href={link.url} class="transition-colors hover:text-accent" rel="noopener noreferrer" target="_blank">{link.label}</a>
       ))}
-      <a href="/rss.xml" class="transition-colors hover:text-accent">RSS 订阅</a>
-      <a href="/toolbox" class="transition-colors hover:text-accent">工具箱</a>
-      <a href="/social" class="transition-colors hover:text-accent">友人帐</a>
-      <a href="/admin" class="transition-colors hover:text-accent">后台</a>
+      <a href="/rss.xml" class="transition-colors hover:text-accent">{t("RSS 订阅")}</a>
+      <a href="/toolbox" class="transition-colors hover:text-accent">{t("工具箱")}</a>
+      <a href="/social" class="transition-colors hover:text-accent">{t("友人帐")}</a>
+      <a href="/admin" class="transition-colors hover:text-accent">{t("后台")}</a>
     </div>
   </div>
 </footer>

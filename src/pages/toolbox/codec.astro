@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import CodecWorkbench from '@/components/toolbox/CodecWorkbench';
 ---
-<ToolLayout title="编解码工作台" description="Base64、URL 与 Unicode 文本编解码，支持中文与 emoji。" active="/toolbox/codec">
-  <CodecWorkbench client:load />
+<ToolLayout title={t("编解码工作台")} description={t("Base64、URL 与 Unicode 文本编解码，支持中文与 emoji。")} active="/toolbox/codec">
+  <CodecWorkbench locale={locale} client:load />
 </ToolLayout>

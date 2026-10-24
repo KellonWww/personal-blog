@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import JwtWorkbench from '@/components/toolbox/JwtWorkbench';
 ---
-<ToolLayout title="JWT 解析" description="读取令牌内容与时间声明，不上传令牌，不验证签名。" active="/toolbox/jwt">
-  <JwtWorkbench client:load />
+<ToolLayout title={t("JWT 解析")} description={t("读取令牌内容与时间声明，不上传令牌，不验证签名。")} active="/toolbox/jwt">
+  <JwtWorkbench locale={locale} client:load />
 </ToolLayout>

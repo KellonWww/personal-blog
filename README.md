@@ -1,7 +1,6 @@
 # 个人博客（Personal Blog）
 
-基于 Astro + Hono + Cloudflare Workers 的个人博客：内容浏览、Markdown 写作、GitHub 登录、评论/留言审核、R2 封面、主题/繁简/全屏/打印、SEO。
-
+基于 Astro + Hono + Cloudflare Workers 的个人博客：内容浏览、Markdown 写作、GitHub 登录、评论/留言审核、R2 封面、主题/中英文/繁简/全屏/打印、SEO。
 ## 技术栈
 
 | 层 | 选型 |
@@ -12,7 +11,6 @@
 | 数据 | Cloudflare D1（SQLite）+ R2（对象存储） |
 | 校验 | Zod 4 |
 | 运行 | 单仓、单 Worker |
-
 ## 目录结构
 
 ```
@@ -31,7 +29,6 @@ migrations/     0001_init / 0002_seed + rollback/
 scripts/        smoke.mjs（端到端冒烟）
 docs/requirements/personal-blog/  需求流水线文档 00~09
 ```
-
 ## 本地开发
 
 ```powershell
@@ -56,12 +53,18 @@ node scripts/ui-motion-test.mjs [playwright模块路径] [浏览器channel]
 
 覆盖前台内页与后台的双主题、320–1440px 布局、键盘导航、减少动态效果和无 JavaScript 阅读。
 设计规则见 `DESIGN.md`；截图与运行结果保存在仓库外 `~/.agents/evidence/personal-blog/`。
+### 中英文界面
 
+导航栏「中 / EN」一键切换中文与英文，覆盖前台、搜索、工具箱和后台；后台位于顶栏，登录页位于右上角。
+偏好保存在一年有效、HttpOnly、SameSite=Lax 的 `blog-locale` Cookie，刷新与跨页面保留，首次默认中文。
+切换保留当前路径、查询和锚点；服务端输出对应 `html lang`、页面标题、日期及反馈，无 JS 也可在前台切换。
+文章标题/正文/摘要、分类与标签、留言、站点配置与工具输入输出保留原文，不进行机器翻译。
+维护界面翻译：`src/lib/i18n/en.json`；只翻译显式界面文案，禁止自动替换 DOM/用户内容。
+回归：`node scripts/language-ui-test.mjs [playwright模块路径] [浏览器channel]`（只读页面，后台 API 使用模拟数据）。
 ### 本地登录
 
 本地通过 `POST /api/auth/dev-login` 创建管理员会话（仅 `ENVIRONMENT=development && AUTH_DEV_MODE=true` 时可用）。
 页面入口：`/admin/login`。
-
 ## 常用脚本
 
 | 命令 | 说明 |
@@ -75,7 +78,6 @@ node scripts/ui-motion-test.mjs [playwright模块路径] [浏览器channel]
 | `npm run db:local:migrate` | 本地 D1 迁移 |
 | `npm run db:local:seed` | 本地灌种子 |
 | `npm run deploy` | build + `wrangler deploy`（产出用） |
-
 ## 环境变量 / 绑定
 
 `wrangler.jsonc` 已配置本地绑定：
@@ -94,7 +96,6 @@ node scripts/ui-motion-test.mjs [playwright模块路径] [浏览器channel]
 GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET / GITHUB_ADMIN_USERNAME
 RESEND_API_KEY / NOTIFY_EMAIL   # 可选，缺省则静默降级
 ```
-
 ## 生产部署（摘要）
 
 ```bash
@@ -109,7 +110,6 @@ wrangler deploy
 ```
 
 完整清单见 `docs/requirements/personal-blog/09-release-checklist.md`。
-
 ## 文档索引
 
 | 文件 | 内容 |
@@ -123,12 +123,10 @@ wrangler deploy
 | `07-self-test-checklist.md` | 自测清单 |
 | `08-frontend-integration.md` | 接口联调文档 |
 | `09-release-checklist.md` | 发布上线清单 |
-
 ## 说明
 
 - 本仓库按要求**未提交、未推送**任何 Git 记录。
 - 娱乐页保留导航；工具箱提供 文本格式化、时间转换、文本 Diff、编解码、文本处理、正则测试、二维码、JWT 解析、URL 参数编辑和安全生成器；Diff 支持在可编辑文本框内高亮新增、删除及修改片段，编辑后重新对比。输入仅在浏览器内处理，不上传、不持久化。
-
 ## 后台 UI 回归
 
 后台采用编辑室布局，提供真实最近编辑入口、文章目录、站点账目和审核待办；沿用前台双主题。
@@ -141,7 +139,6 @@ node scripts/admin-redesign-test.mjs /absolute/path/to/playwright/index.mjs msed
 可省略模块路径以使用环境中的 `playwright`；不指定浏览器通道时使用 Playwright Chromium。
 覆盖双主题、320–1440px、五个后台视图、文章编辑器、筛选/选择、未保存保护、键盘导航、空态/重试及减少动态效果。
 所有 API 都由只读 mock 拦截，不登录真实账号、不验证或触发真实保存/发布/审核。截图和结果保存在仓库外的 `~/.agents/evidence/personal-blog/`。
-
 ## 工具箱
 
 | 路由 | 功能 |
@@ -175,3 +172,29 @@ JSON 大整数需使用字符串；时间戳自动识别是启发式规则，边
 新增工具说明：二维码库按需从本站加载，保留黑白与四模块静区；只生成，不识别图片。JWT 不验证签名，不用于身份或权限判断，不支持加密 JWE。
 URL 不访问目标站点；查询参数按 URLSearchParams 规则重组（空格为 +），修改签名 URL 可能使其失效。
 UUID / 密码使用浏览器安全随机源；每个密码包含所有选中的字符类。SHA-256 仅用于摘要校验，不是加密或密码存储方案；安全生成器需要 HTTPS 或 localhost。
+
+## 站内快捷搜索
+
+前台页面按 `Ctrl+F`（macOS：`⌘F`）或点击顶部搜索按钮，打开居中搜索弹窗。
+输入标题、摘要、标签或分类关键词即时匹配，空格分隔的多个关键词须全部命中。
+`Esc`、关闭按钮或点击遮罩关闭；弹窗限制键盘焦点并恢复原焦点，同页再次打开保留关键词。
+首次打开才请求文章索引；`/search` 独立搜索页保留，无 JavaScript 时顶部链接仍跳转至该页（搜索需要 JavaScript）。
+此快捷键替代前台页面的浏览器页内查找；后台不受影响。
+浏览器回归（先启动 dev）：`node scripts/search-ui-test.mjs [playwright模块路径] [浏览器channel]`；覆盖快捷键、搜索、失败重试、焦点、关闭、双主题与移动端，截图保存在仓库外证据目录。
+
+## 雾林手记 UI
+
+全站采用奶油钴蓝×青柠／墨蓝酸橙×冰川青双主题，保留悬浮毛玻璃导航与居中搜索浮层；首页以蓝底青柠／冰川青植物标本和真实文章形成识别。正文保持中性纸面，支持减少动态效果与透明度。
+
+```bash
+node scripts/studio-ui-test.mjs [playwright模块路径] [浏览器channel]
+```
+
+覆盖双主题、13 个路由、320–1440px 布局、文字对比和快捷键搜索；不修改业务数据。
+证据：~/.agents/evidence/personal-blog/studio-audit-20261024.md
+
+### 搜索与主题交互
+
+- Ctrl+F／⌘F 打开搜索：雾面玻璃面板与柔焦遮罩同步渐入，退出完成后恢复焦点与滚动，支持快速重新打开。
+- 导航主题按钮一步切换明暗；旁边箭头保留主题设置和跟随系统。系统减少动态效果时禁用过渡。
+- 回归：`node scripts/interaction-polish-test.mjs [playwright模块路径] [浏览器channel]`。

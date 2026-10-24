@@ -1,3 +1,5 @@
+import { translator, type Locale } from './i18n';
+
 export function toBoolean(value: string | undefined): boolean {
   return value === 'true' || value === '1';
 }
@@ -28,18 +30,18 @@ export function countWords(value: string): number {
   return chinese + latin;
 }
 
-export function formatDate(value: string | null | undefined): string {
+export function formatDate(value: string | null | undefined, locale: Locale = 'zh-CN'): string {
   if (!value) {
-    return '未发布';
+    return translator(locale)('未发布');
   }
-  return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(value));
+  return new Intl.DateTimeFormat(locale, { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(value));
 }
 
-export function formatDateTime(value: string | null | undefined): string {
+export function formatDateTime(value: string | null | undefined, locale: Locale = 'zh-CN'): string {
   if (!value) {
-    return '未发布';
+    return translator(locale)('未发布');
   }
-  return new Intl.DateTimeFormat('zh-CN', {
+  return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -48,16 +50,16 @@ export function formatDateTime(value: string | null | undefined): string {
   }).format(new Date(value));
 }
 
-export function formatMonth(value: string): string {
-  return new Intl.DateTimeFormat('zh-CN', { year: 'numeric', month: 'long' }).format(new Date(`${value}-01T00:00:00Z`));
+export function formatMonth(value: string, locale: Locale = 'zh-CN'): string {
+  return new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long' }).format(new Date(`${value}-01T00:00:00Z`));
 }
 
-export function formatNumber(value: number): string {
-  return new Intl.NumberFormat('zh-CN').format(value);
+export function formatNumber(value: number, locale: Locale = 'zh-CN'): string {
+  return new Intl.NumberFormat(locale).format(value);
 }
 
-export function readingTime(wordCount: number): string {
-  return `${Math.max(1, Math.ceil(wordCount / 400))} 分钟`;
+export function readingTime(wordCount: number, locale: Locale = 'zh-CN'): string {
+  return translator(locale)('{0} 分钟', Math.max(1, Math.ceil(wordCount / 400)));
 }
 
 export function safeJsonParse<T>(value: string, fallback: T): T {

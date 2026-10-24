@@ -1,12 +1,16 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import PostEditor from '@/components/admin/PostEditor';
 
 const postId = Astro.url.searchParams.get('id');
 ---
 
-<AdminLayout title="编辑文章">
+<AdminLayout title={t("编辑文章")}>
   <div>
-    <PostEditor client:load postId={postId} />
+    <PostEditor locale={locale} client:load postId={postId} />
   </div>
 </AdminLayout>

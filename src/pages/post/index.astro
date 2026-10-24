@@ -1,4 +1,8 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
@@ -32,36 +36,36 @@ function pageHref(target: number): string {
 }
 ---
 
-<BaseLayout title="文章" description="全部文章列表" active="post">
-  <PageHeading title="文章索引" description="从技术到生活，把写过的东西慢慢翻一遍。" meta={`${result.total} 篇文章`} />
+<BaseLayout title={t("文章")} description={t("全部文章列表")} active="post">
+  <PageHeading title={t("文章索引")} description={t("从技术到生活，把写过的东西慢慢翻一遍。")} meta={t("{0} 篇文章", result.total)} />
 
   {filters.length > 0 && (
     <div class="mt-4 flex flex-wrap items-center gap-2">
-      {filters.map((item) => <span class="chip border-accent text-accent">{item.label}</span>)}
-      <a href="/post" class="text-xs text-muted hover:text-accent">清除筛选</a>
+      {filters.map((item) => <span class="chip border-accent text-accent">{t(item.label)}</span>)}
+      <a href="/post" class="text-xs text-muted hover:text-accent">{t("清除筛选")}</a>
     </div>
   )}
 
   <div class="mt-6 grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1fr)_15rem]">
     <div>
       {result.items.length === 0 ? (
-        <p class="py-12 text-sm text-muted">没有符合条件的文章。</p>
+        <p class="py-12 text-sm text-muted">{t("没有符合条件的文章。")}</p>
       ) : (
         <div>{result.items.map((post) => <ArticleCard post={post} motion />)}</div>
       )}
 
       {result.totalPages > 1 && (
-        <nav class="mt-6 flex items-center justify-center gap-2 text-sm" aria-label="分页">
-          {page > 1 && <a href={pageHref(page - 1)} class="btn">上一页</a>}
-          <span class="px-2 text-muted">第 {result.page} / {result.totalPages} 页</span>
-          {page < result.totalPages && <a href={pageHref(page + 1)} class="btn">下一页</a>}
+        <nav class="mt-6 flex items-center justify-center gap-2 text-sm" aria-label={t("分页")}>
+          {page > 1 && <a href={pageHref(page - 1)} class="btn">{t("上一页")}</a>}
+          <span class="px-2 text-muted">{t("第 {0} / {1} 页", result.page, result.totalPages)}</span>
+          {page < result.totalPages && <a href={pageHref(page + 1)} class="btn">{t("下一页")}</a>}
         </nav>
       )}
     </div>
 
     <aside class="space-y-6">
       <section>
-        <div class="rule-label">分类</div>
+        <div class="rule-label">{t("分类")}</div>
         <ul class="mt-3 space-y-1 text-sm">
           {categories.map((item) => (
             <li class="flex items-center justify-between border-b border-line py-1.5">
@@ -72,7 +76,7 @@ function pageHref(target: number): string {
         </ul>
       </section>
       <section>
-        <div class="rule-label">标签</div>
+        <div class="rule-label">{t("标签")}</div>
         <div class="mt-3 flex flex-wrap gap-2">
           {tags.map((item) => <a href={`/post?tag=${item.slug}`} class="chip">#{item.name}</a>)}
         </div>

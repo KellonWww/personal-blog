@@ -2,7 +2,7 @@ export const JSON_INPUT_LIMIT = 200_000;
 export const DIFF_INPUT_LIMIT = 100_000;
 export const DIFF_LINE_LIMIT = 1_000;
 
-export interface JsonEntry { path: string; preview: string }
+export interface JsonEntry { path: string; preview: string; structured?: boolean }
 export interface JsonResult { pretty: string; compact: string; entries: JsonEntry[]; truncated: boolean }
 
 export function analyzeJson(source: string, indent: 2 | 4 = 2): JsonResult {
@@ -29,7 +29,7 @@ export function analyzeJson(source: string, indent: 2 | 4 = 2): JsonResult {
     const preview = Array.isArray(item) ? `数组 · ${item.length} 项`
       : item !== null && typeof item === 'object' ? `对象 · ${Object.keys(item).length} 个字段`
       : JSON.stringify(item);
-    entries.push({ path: current.path, preview: preview.length > 160 ? preview.slice(0, 160) + '…' : preview });
+    entries.push({ path: current.path, structured: item !== null && typeof item === 'object', preview: preview.length > 160 ? preview.slice(0, 160) + '…' : preview });
     if (item !== null && typeof item === 'object') {
       const children = Object.entries(item).slice(0, 300);
       for (let index = children.length - 1; index >= 0; index--) {

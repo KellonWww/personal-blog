@@ -1,3 +1,4 @@
+import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useState } from 'react';
 import ArchivePublicationReview from '@/components/admin/ArchivePublicationReview';
 import { archiveRequest } from '@/lib/archive-admin';
@@ -5,9 +6,10 @@ import { errorMessage } from '@/lib/admin-api';
 import type { ArchivePublication } from '@/types/archive';
 
 const PAGE_SIZE = 20;
-export default function ArchiveDrafts({ archiveId, token, disabled, onDirtyChange }: {
+function ArchiveDrafts({ archiveId, token, disabled, onDirtyChange }: {
   archiveId: string; token: string; disabled: boolean; onDirtyChange: (dirty: boolean) => void;
 }) {
+  const { t } = useI18n();
   const [reviewDirty, setReviewDirty] = useState(false);
   useEffect(() => { onDirtyChange(reviewDirty); }, [reviewDirty, onDirtyChange]);
   useEffect(() => () => onDirtyChange(false), [onDirtyChange]);
@@ -29,19 +31,21 @@ export default function ArchiveDrafts({ archiveId, token, disabled, onDirtyChang
     return () => controller.abort();
   }, [archiveId, page, refresh]);
   return <section className="admin-panel archive-section">
-    <h2>已转博客稿</h2>
-    <p className="archive-note">这里只显示关联记录，不请求图片或打开公开页面。删除草稿不会解除档案关联；来源更新不会覆盖已转稿。</p>
-    {loading ? <p role="status">正在读取转稿记录…</p> : error ? <div role="alert"><p>{error}</p><button type="button" className="btn" onClick={() => setRefresh((value) => value + 1)}>重试读取</button></div> : items.length ?
+    <h2>{t("已转博客稿")}</h2>
+    <p className="archive-note">{t("这里只显示关联记录，不请求图片或打开公开页面。删除草稿不会解除档案关联；来源更新不会覆盖已转稿。")}</p>
+    {loading ? <p role="status">{t("正在读取转稿记录…")}</p> : t(error) ? <div role="alert"><p>{t(error)}</p><button type="button" className="btn" onClick={() => setRefresh((value) => value + 1)}>{t("重试读取")}</button></div> : items.length ?
       <ul>{items.map((item) => <li key={item.id}>
-        <p>{item.postDeleted ? '已删除' : item.postStatus === 'draft' ? '私有草稿' : '已发布'} · {item.createdAt}</p>
-        {!item.postDeleted && <button type="button" className="btn" disabled={reviewDirty || disabled} onClick={() => setInspected(item.id)}>审阅确认</button>}
-        <label className="archive-label">博客文章 ID<input className="field" readOnly value={item.postId} onFocus={(event) => event.currentTarget.select()} /></label>
-      </li>)}</ul> : <p>本页没有转稿记录。</p>}
+        <p>{item.postDeleted ? t('已删除') : item.postStatus === 'draft' ? t('私有草稿') : t('已发布')} · {item.createdAt}</p>
+        {!item.postDeleted && <button type="button" className="btn" disabled={reviewDirty || disabled} onClick={() => setInspected(item.id)}>{t("审阅确认")}</button>}
+        <label className="archive-label">{t("博客文章 ID")}<input className="field" readOnly value={item.postId} onFocus={(event) => event.currentTarget.select()} /></label>
+      </li>)}</ul> : <p>{t("本页没有转稿记录。")}</p>}
     {inspected && <ArchivePublicationReview key={archiveId + ':' + inspected} archiveId={archiveId} publicationId={inspected} token={token} disabled={disabled} onDirtyChange={setReviewDirty} onConfirmed={() => setRefresh((value) => value + 1)} onClose={() => setInspected('')} />}
     <div className="archive-actions">
-      <button type="button" className="btn" disabled={reviewDirty || loading || page === 1} onClick={() => setPage((value) => value - 1)}>上一页</button>
-      <span>第 {page} 页</span>
-      <button type="button" className="btn" disabled={reviewDirty || loading || Boolean(error) || items.length < PAGE_SIZE} onClick={() => setPage((value) => value + 1)}>下一页</button>
+      <button type="button" className="btn" disabled={reviewDirty || loading || page === 1} onClick={() => setPage((value) => value - 1)}>{t("上一页")}</button>
+      <span>{t("第 {0} 页", page)}</span>
+      <button type="button" className="btn" disabled={reviewDirty || loading || Boolean(t(error)) || items.length < PAGE_SIZE} onClick={() => setPage((value) => value + 1)}>{t("下一页")}</button>
     </div>
   </section>;
 }
+
+export default withLocale(ArchiveDrafts);

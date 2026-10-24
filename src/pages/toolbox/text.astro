@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import TextWorkbench from '@/components/toolbox/TextWorkbench';
 ---
-<ToolLayout title="文本处理" description="按行去重、排序、去空行、修剪空白、大小写转换与添加前后缀。" active="/toolbox/text">
-  <TextWorkbench client:load />
+<ToolLayout title={t("文本处理")} description={t("按行去重、排序、去空行、修剪空白、大小写转换与添加前后缀。")} active="/toolbox/text">
+  <TextWorkbench locale={locale} client:load />
 </ToolLayout>

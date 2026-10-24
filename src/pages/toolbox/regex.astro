@@ -1,7 +1,11 @@
 ---
+import { getLocale, LOCALE_COOKIE, translator } from '@/lib/i18n';
+const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
+const t = translator(locale);
+
 import ToolLayout from '@/layouts/ToolLayout.astro';
 import RegexWorkbench from '@/components/toolbox/RegexWorkbench';
 ---
-<ToolLayout title="正则测试器" description="高亮正则匹配、查看捕获组，并预览替换结果。" active="/toolbox/regex">
-  <RegexWorkbench client:load />
+<ToolLayout title={t("正则测试器")} description={t("高亮正则匹配、查看捕获组，并预览替换结果。")} active="/toolbox/regex">
+  <RegexWorkbench locale={locale} client:load />
 </ToolLayout>
