@@ -37,6 +37,13 @@ async function assertSlugAvailable(db: D1Database, slug: string, excludeId?: str
 
 async function insertRelations(db: D1Database, postId: string, categoryIds: string[], tagIds: string[], operatorId: string): Promise<D1PreparedStatement[]> {
   const statements: D1PreparedStatement[] = [];
+  for (const [table, ids] of [['categories', categoryIds], ['tags', tagIds]] as const) {
+    if (!ids.length) continue;
+    const selected = JSON.stringify(ids);
+    // A manager can delete a term after the editor loaded: reject stale selections atomically.
+    statements.push(db.prepare(`SELECT CASE WHEN COUNT(*) = json_array_length(?) THEN 1 ELSE json('TAXONOMY_CHANGED') END
+      FROM ${table} WHERE deleted_at IS NULL AND id IN (SELECT value FROM json_each(?))`).bind(selected, selected));
+  }
   categoryIds.forEach((categoryId) => {
     statements.push(db.prepare('INSERT OR IGNORE INTO post_categories (post_id, category_id, created_by) VALUES (?, ?, ?)').bind(postId, categoryId, operatorId));
   });

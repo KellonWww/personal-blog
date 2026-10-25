@@ -9,6 +9,7 @@ import { listModerationQueue, updateModerationStatus } from '@/server/db/interac
 import { getSiteSettings, upsertSetting } from '@/server/db/settings';
 import { createPost, getAdminPost, listSelectableTaxonomy, PostValidationError, softDeletePost, updatePost } from '@/server/services/posts';
 import postActions from '@/server/routes/post-actions';
+import taxonomyRoutes from '@/server/routes/taxonomy';
 import type { AppBindings } from '@/server/types';
 
 const admin = new Hono<AppBindings>();
@@ -91,6 +92,7 @@ function operator(c: { get: (key: 'user') => AppBindings['Variables']['user'] })
 }
 
 admin.route('/', postActions);
+admin.route('/', taxonomyRoutes);
 
 admin.get('/admin/posts', async (c) => {
   const query = c.req.query();

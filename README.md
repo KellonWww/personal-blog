@@ -128,7 +128,7 @@ wrangler deploy
 - 本仓库按要求**未提交、未推送**任何 Git 记录。
 - 娱乐页保留导航；工具箱提供 文本格式化、时间转换、文本 Diff、编解码、文本处理、正则测试、二维码、JWT 解析、URL 参数编辑和安全生成器；Diff 支持在可编辑文本框内高亮新增、删除及修改片段，编辑后重新对比。输入仅在浏览器内处理，不上传、不持久化。
 ## 后台 UI 回归
-
+「后台 → 分类与标签」支持新增、编辑、搜索和删除；分类可设置简介、排序。删除仅解除文章关联，不删除文章；有子分类时不能删除，被已发布档案关联稿使用时不能修改或删除，修改路径会影响旧筛选链接，无需迁移。专项测试：`node scripts/taxonomy-api-test.mjs`（内存库）；`node scripts/taxonomy-ui-test.mjs [playwright模块路径] [浏览器channel]`（mock，不写真实数据）。
 后台采用编辑室布局，提供真实最近编辑入口、文章目录、站点账目和审核待办；沿用前台双主题。「后台 → 站点设置 → 友人帐 · 友链」支持新增、编辑、删除和排序，保存后刷新 `/social/` 生效；名称及 http(s) 地址必填、简介选填，最多 100 项。沿用 `site.friends`，无需数据库迁移；异常旧配置会阻止覆盖，未保存修改有离开提醒。
 启动本地开发服务后，在另一个终端执行（需环境中已有 Playwright 和浏览器，不会新增项目依赖）：
 
@@ -137,7 +137,7 @@ node scripts/admin-redesign-test.mjs /absolute/path/to/playwright/index.mjs msed
 ```
 
 可省略模块路径以使用环境中的 `playwright`；不指定浏览器通道时使用 Playwright Chromium。
-覆盖双主题、320–1440px、五个后台视图、文章编辑器、筛选/选择、未保存保护、键盘导航、空态/重试及减少动态效果。
+覆盖双主题、320–1440px、六个后台视图、文章编辑器、筛选/选择、未保存保护、键盘导航、空态/重试及减少动态效果。
 所有 API 都由只读 mock 拦截，不登录真实账号、不验证或触发真实保存/发布/审核。截图和结果保存在仓库外的 `~/.agents/evidence/personal-blog/`。友链专项回归：`node --test scripts/friends.test.mjs`；`node scripts/admin-api-test.mjs` 验证鉴权和非法输入（不修改内容）；`node scripts/friends-ui-test.mjs [playwright模块路径] [浏览器channel]` 以 mock 验证增删改排序、保存与重载，不写真实数据库。
 ## 工具箱
 

@@ -48,6 +48,7 @@ await page.route('**/api/**', async route => {
     { id: 'message-1', type: 'guestbook', userName: '路过的读者', title: '', content: '来坐一会儿，等下一篇更新。', status: 'pending', createdAt: posts[0].updatedAt }
   ] };
   else if (url.pathname === '/api/admin/posts/post-0') data = { ...posts[0], content: '# 写作笔记\n\n一份只读的视觉测试正文。' };
+  else if (/^\/api\/admin\/taxonomy\/(categories|tags)$/.test(url.pathname)) data = { items: [] };
   else if (url.pathname === '/api/admin/taxonomy') data = { categories: [], tags: [] };
   else if (url.pathname === '/api/admin/settings') data = { settings: { 'site.name': 'Kale的数字花园', 'site.social_links': '[]' } };
   else if (url.pathname === '/api/admin/archives') data = { items: [], total: 0, totalPages: 1, page: 1, pageSize: 20 };
@@ -60,7 +61,7 @@ async function layout(label) {
   assert(await page.locator('.admin-page-header h1').isVisible(), label + ': title missing');
   assert.equal(await page.getByRole('navigation', { name: '后台导航' }).locator('[aria-current="page"]').count(), 1);
 }
-const views = [['工作台', 'overview'], ['文章管理', 'posts'], ['私人档案', 'archives'], ['互动审核', 'moderation'], ['站点设置', 'settings']];
+const views = [['工作台', 'overview'], ['文章管理', 'posts'], ['私人档案', 'archives'], ['互动审核', 'moderation'], ['分类与标签', 'taxonomy'], ['站点设置', 'settings']];
 try {
   for (const theme of ['dianqing', 'moye']) {
     await context.addInitScript(id => localStorage.setItem('blog-theme', id), theme);
@@ -83,7 +84,7 @@ try {
           await page.screenshot({ path: join(evidence, `admin-${view}-${theme}-${width}-20261021.png`), fullPage: true });
         }
       }
-      record(theme + '/' + width + ': five views, no overflow, active navigation and populated data');
+      record(theme + '/' + width + ': six views, no overflow, active navigation and populated data');
     }
   }
   await page.setViewportSize({ width: 1440, height: 1000 });

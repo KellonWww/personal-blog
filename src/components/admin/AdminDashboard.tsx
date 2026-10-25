@@ -8,12 +8,14 @@ import PostManager from './PostManager';
 import ModerationManager from './ModerationManager';
 import SiteSettings from './SiteSettings';
 import ArchiveManager from './ArchiveManager';
+import TaxonomyManager from './TaxonomyManager';
 
 const DESCRIPTIONS: Record<AdminView, string> = {
   overview: '接着写，或整理已经写下的内容。',
   posts: '查找、编辑与发布，管理每一篇文章。',
   archives: '只属于你的文本档案，与公开文章分开存放。',
   moderation: '回应读者，照看评论与留言。',
+  taxonomy: '整理分类与标签，让文章各有归处。',
   settings: '维护站点资料，让花园保持自己的样子。'
 };
 
@@ -91,6 +93,7 @@ function AdminDashboard() {
         {view === 'posts' && <PostManager token={user.csrfToken} />}
         {view === 'archives' && <ArchiveManager token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
         {view === 'moderation' && <ModerationManager token={user.csrfToken} />}
+        {view === 'taxonomy' && <TaxonomyManager token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
         {view === 'settings' && <SiteSettings token={user.csrfToken} onDirtyChange={setWorkspaceDirty} />}
       </>}
     </AdminShell>

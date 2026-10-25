@@ -214,3 +214,12 @@
 @media (max-width: 400px) { .admin-topline { flex-wrap: wrap; padding-block: 10px; } .admin-display-controls { margin-left: auto; } }
 
 .admin-friend-card { min-width: 0; margin: 16px 0; padding: 16px 0; border: 0; border-top: 1px solid var(--line); }
+
+.admin-taxonomy-hint { padding: 0 20px 16px; color: var(--muted); font-size: 12px; }
+.admin-taxonomy-list { list-style: none; margin: 0; padding: 0; }
+.admin-taxonomy-list li { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 20px; border-top: 1px solid var(--line); }
+.admin-taxonomy-detail { display: grid; min-width: 0; gap: 6px; overflow-wrap: anywhere; }
+.admin-taxonomy-detail code, .admin-taxonomy-detail p, .admin-taxonomy-detail span { color: var(--muted); font-size: 12px; }
+.admin-taxonomy-list li > div:last-child { flex-shrink: 0; }
+.admin-taxonomy-editor { margin-top: 24px; }
+@media (max-width: 500px) { .admin-taxonomy-list li { align-items: start; flex-direction: column; gap: 12px; } }
