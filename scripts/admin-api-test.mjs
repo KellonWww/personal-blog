@@ -44,6 +44,10 @@ try {
   check(settings.settings && typeof settings.settings === 'object', '已有设置可读取');
   for (const [body, name] of [
     [{ 'site.social_links': '[{"label":"bad","url":"javascript:alert(1)"}]' }, '危险社交链接被服务端拒绝'],
+    [{ 'site.friends': '[{"name":"bad","url":"javascript:alert(1)"}]' }, '危险友链被服务端拒绝'],
+    [{ 'site.friends': '[{"name":"","url":"https://example.com"}]' }, '空白友链名称被拒绝'],
+    [{ 'site.friends': '{}' }, '非数组友链被拒绝'],
+    [{ 'site.friends': JSON.stringify(Array(101).fill({ name: 'test', url: 'https://example.com' })) }, '超出友链数量上限被拒绝'],
     [{ 'site.started_at': '2026-02-30' }, '不存在的建站日期被拒绝'],
     [{ 'profile.name': 123 }, '错误设置字段类型被拒绝'],
     [{ 'profile.avatar': '//untrusted.example/a.png' }, '协议相对头像地址被拒绝']

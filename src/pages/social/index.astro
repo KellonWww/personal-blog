@@ -7,11 +7,11 @@ import { env } from 'cloudflare:workers';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeading from '@/components/PageHeading.astro';
 import { getSiteSettings } from '@/server/db/settings';
-import { safeJsonParse } from '@/lib/format';
+import { publicFriends } from '@/lib/friends';
 
 const db = env.DB;
 const settings = await getSiteSettings(db);
-const friends = safeJsonParse<Array<{ name: string; url: string; desc?: string }>>(settings['site.friends'] ?? '[]', []);
+const friends = publicFriends(settings['site.friends'] ?? '[]');
 ---
 
 <BaseLayout title={t("友人帐")} description={t("友情链接")}>
@@ -19,7 +19,6 @@ const friends = safeJsonParse<Array<{ name: string; url: string; desc?: string }
   {friends.length === 0 ? (
     <div class="mt-6 border-l-2 border-line pl-4 text-sm text-muted">
       <p>{t("还没有配置友链。")}</p>
-      <p class="mt-2 text-xs">{t("在 D1 的")}<code class="font-mono text-[0.8em]">site_settings</code>{t("中写入")}<code class="font-mono text-[0.8em]">site.friends</code>{t("（JSON 数组，字段 name / url / desc）即可展示。")}</p>
     </div>
   ) : (
     <div class="mt-6 border-t border-line">

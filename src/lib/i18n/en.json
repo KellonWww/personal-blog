@@ -1051,5 +1051,19 @@
   "已记录发布确认 v{0}。{1}": "Publication confirmation v{0} recorded. {1}",
   "从关键词浏览相关内容。": "Browse related writing by keyword.",
   "文章标签": "Article tags",
-  "默认展示最新文章": "Showing the latest articles"
+  "默认展示最新文章": "Showing the latest articles",
+  "友人帐 · 友链": "Friends · Blogroll",
+  "＋ 添加友链": "+ Add friend",
+  "按列表顺序展示在友人帐，保存设置后生效。最多 100 项。": "Shown in this order on Friends after saving settings. Up to 100 links.",
+  "友链 {0}": "Friend {0}",
+  "站点地址": "Site URL",
+  "简介（选填）": "Description (optional)",
+  "上移友链 {0}": "Move friend {0} up",
+  "下移友链 {0}": "Move friend {0} down",
+  "上移": "Move up",
+  "下移": "Move down",
+  "移除友链 {0}": "Remove friend {0}",
+  "确定移除这条友链？保存设置后生效。": "Remove this friend? The change takes effect after saving settings.",
+  "还没有友链，添加一位朋友吧。": "No friends yet. Add a friend to your blogroll.",
+  "友链最多 100 项，请填写名称（最多 100 字）、有效的 http(s) 地址（最多 500 字）和简介（最多 500 字）": "Up to 100 friends. Enter a name (100 characters), a valid http(s) URL (500 characters), and an optional description (500 characters)."
 }

@@ -1,6 +1,8 @@
 import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useRef, useState } from 'react';
 import { adminRequest, adminWrite, errorMessage } from '@/lib/admin-api';
+import { parseFriends, type FriendLink } from '@/lib/friends';
+import FriendLinksEditor from './FriendLinksEditor';
 
 const FIELDS = [
   { key: 'profile.name', label: '站点名称', placeholder: 'Kale的数字花园', max: 100 },
@@ -27,9 +29,11 @@ function SiteSettings({ token, onDirtyChange }: { token: string; onDirtyChange: 
     const controller = new AbortController();
     setLoading(true); setError('');
     adminRequest<{ settings: Record<string, string> }>('/api/admin/settings', { signal: controller.signal }).then(({ settings }) => {
-      const next = Object.fromEntries([...FIELDS.map((field) => field.key), 'site.about', 'site.social_links'].map((key) => [key, settings[key] ?? (key === 'site.social_links' ? '[]' : '')]));
+      const next = Object.fromEntries([...FIELDS.map((field) => field.key), 'site.about', 'site.social_links', 'site.friends'].map((key) => [key, settings[key] ?? (key === 'site.social_links' || key === 'site.friends' ? '[]' : '')]));
       const links: unknown = JSON.parse(next['site.social_links'] ?? '[]');
       if (!Array.isArray(links) || !links.every((item) => item && typeof item === 'object' && typeof item.label === 'string' && typeof item.url === 'string')) throw new Error('已有社交链接格式异常，请先检查站点配置');
+      // Refuse to silently replace malformed existing friend data with an empty list.
+      parseFriends(next['site.friends'] ?? '[]');
       setValues(next); setInitial(JSON.stringify(next));
     }).catch((reason: unknown) => { if (!controller.signal.aborted) setError(errorMessage(reason)); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
@@ -45,6 +49,7 @@ function SiteSettings({ token, onDirtyChange }: { token: string; onDirtyChange: 
   const socialLinks: Array<{ label: string; url: string }> = (() => {
     try { return JSON.parse(values['site.social_links'] || '[]') as Array<{ label: string; url: string }>; } catch { return []; }
   })();
+  const friends: FriendLink[] = JSON.parse(values['site.friends'] || '[]');
   function changeLinks(links: Array<{ label: string; url: string }>) { setValues({ ...values, 'site.social_links': JSON.stringify(links) }); }
 
   async function save() {
@@ -56,7 +61,7 @@ function SiteSettings({ token, onDirtyChange }: { token: string; onDirtyChange: 
         if (!item || typeof item !== 'object' || typeof item.label !== 'string' || typeof item.url !== 'string' || !item.label.trim() || item.label.length > 100 || item.url.length > 500) return false;
         try { return ['http:', 'https:'].includes(new URL(item.url).protocol); } catch { return false; }
       })) throw new Error('社交链接最多 20 项，请填写名称和有效的 http(s) 地址');
-      const snapshot = { ...values, 'site.social_links': JSON.stringify(links) };
+      const snapshot = { ...values, 'site.social_links': JSON.stringify(links), 'site.friends': JSON.stringify(parseFriends(values['site.friends'] || '[]')) };
       await adminRequest('/api/admin/settings', adminWrite(token, 'PUT', snapshot));
       setValues(snapshot); setInitial(JSON.stringify(snapshot)); setMessage('站点设置已保存，前台刷新后生效');
     } catch (reason) { setError(errorMessage(reason)); }
@@ -76,6 +81,7 @@ function SiteSettings({ token, onDirtyChange }: { token: string; onDirtyChange: 
           {socialLinks.map((link, index) => <div className="admin-social-row" key={index}><input className="field" aria-label={t("链接 {0} 名称", index + 1)} placeholder={t("例如 GitHub")} maxLength={100} value={link.label} onChange={(event) => changeLinks(socialLinks.map((item, position) => position === index ? { ...item, label: event.target.value } : item))} /><input className="field" type="url" aria-label={t("链接 {0} 地址", index + 1)} placeholder="https://…" maxLength={500} value={link.url} onChange={(event) => changeLinks(socialLinks.map((item, position) => position === index ? { ...item, url: event.target.value } : item))} /><button type="button" className="btn btn-ghost" aria-label={t("移除链接 {0}", index + 1)} onClick={() => changeLinks(socialLinks.filter((_, position) => position !== index))}>{t("移除")}</button></div>)}
           {!socialLinks.length && <p className="text-xs text-muted">{t("还没有社交链接，可添加 GitHub、个人主页等入口。")}</p>}
         </section>
+        <FriendLinksEditor friends={friends} onChange={(items) => { setValues({ ...values, 'site.friends': JSON.stringify(items) }); setMessage(''); }} />
       </fieldset>
       <div className="admin-pagination"><span>{t("只修改站点内容，不涉及登录密钥与基础设施配置。")}</span><button type="submit" className="btn btn-primary" disabled={saving || !dirty}>{saving ? t('保存中…') : t('保存设置')}</button></div>
     </form>

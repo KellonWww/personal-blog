@@ -212,3 +212,5 @@
 .admin-display-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 @media (max-width: 760px) { html[lang="en"] .admin-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); } html[lang="en"] .admin-nav a, html[lang="en"] .admin-nav button { white-space: normal; padding-inline: 4px; } }
 @media (max-width: 400px) { .admin-topline { flex-wrap: wrap; padding-block: 10px; } .admin-display-controls { margin-left: auto; } }
+
+.admin-friend-card { min-width: 0; margin: 16px 0; padding: 16px 0; border: 0; border-top: 1px solid var(--line); }

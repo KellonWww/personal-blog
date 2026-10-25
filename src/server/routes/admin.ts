@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { fail, ok } from '@/lib/api';
+import { FRIENDS_ERROR, parseFriends } from '@/lib/friends';
 import { ALLOWED_IMAGE_TYPES, MAX_UPLOAD_BYTES } from '@/lib/constants';
 import { queryOne } from '@/server/db/client';
 import { listPosts } from '@/server/db/content';
@@ -44,7 +45,8 @@ const SETTING_KEYS = new Set([
   'site.about',
   'site.icp',
   'site.started_at',
-  'site.social_links'
+  'site.social_links',
+  'site.friends'
 ]);
 
 function isWebUrl(value: string): boolean {
@@ -70,6 +72,10 @@ const settingsSchema = z.object({
     const date = new Date(value);
     return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
   }, '建站日期必须是有效的 YYYY-MM-DD 日期'),
+  'site.friends': z.string().max(150000).transform((value, ctx) => {
+    try { return JSON.stringify(parseFriends(value)); }
+    catch { ctx.addIssue({ code: 'custom', message: FRIENDS_ERROR }); return z.NEVER; }
+  }),
   'site.social_links': z.string().max(15000).refine((value) => {
     try { return socialLinksSchema.safeParse(JSON.parse(value)).success; } catch { return false; }
   }, '社交链接必须包含名称及有效 http(s) 地址，最多 20 项')
