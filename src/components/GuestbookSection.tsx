@@ -137,7 +137,7 @@ function GuestbookSection({ initialItems, initialTotal }: Props) {
             </div>
           </form>
         ) : (
-          <p className="border-l-2 border-accent-line pl-3 py-1 text-sm text-muted">{t("留言需要登录，请前往")}<a href="/admin/login" className="text-accent">{t("登录页")}</a>。
+          <p className="border-l-2 border-accent-line pl-3 py-1 text-sm text-muted">{t("留言需要登录，请前往")}<a href="/login" className="text-accent">{t("登录页")}</a>。
           </p>
         )}
         {message && <p className="mt-3 text-sm text-accent">{t(message)}</p>}

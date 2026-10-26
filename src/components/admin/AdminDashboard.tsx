@@ -57,7 +57,7 @@ function AdminDashboard() {
     setError('');
     adminRequest<{ user: SessionUser | null }>('/api/auth/me', { signal: controller.signal }).then(({ user: current }) => {
       if (!current) { window.location.assign('/admin/login'); return; }
-      if (current.role !== 'admin') { throw new Error('当前账号没有管理员权限'); }
+      if (current.role !== 'admin') { window.location.replace('/'); return; }
       setUser(current);
     }).catch((reason: unknown) => {
       if (!controller.signal.aborted) setError(errorMessage(reason));

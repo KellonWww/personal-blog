@@ -1,6 +1,6 @@
 import { useI18n, withLocale } from '@/lib/i18n/react';
 import { useEffect, useState } from 'react';
-import { loginDestination } from '@/lib/auth-redirect';
+import { authorizedLoginDestination, loginDestination } from '@/lib/auth-redirect';
 import type { SessionUser } from '@/types/domain';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }: Props) {
   const { t } = useI18n();
   const destination = loginDestination(returnTo);
-  const privateReading = destination !== '/admin';
+  const privateReading = destination.startsWith('/private');
   const [user, setUser] = useState<SessionUser | null>(null);
   const [checking, setChecking] = useState(true);
   const [pending, setPending] = useState(false);
@@ -47,12 +47,29 @@ function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }: Props) {
         setMessage(payload.message ?? '开发登录不可用');
         return;
       }
-      window.location.href = destination;
+      const payload = await response.json() as { data?: { user?: SessionUser } };
+      window.location.href = authorizedLoginDestination(destination, payload.data?.user?.role);
     } catch {
       setMessage('网络异常，请稍后重试');
     } finally {
       setPending(false);
     }
+  }
+
+  async function logout() {
+    if (!user) return;
+    setPending(true);
+    setMessage('');
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'X-CSRF-Token': user.csrfToken }
+      });
+      if (!response.ok) throw new Error('退出失败，请稍后重试');
+      setUser(null);
+    } catch {
+      setMessage('退出失败，请稍后重试');
+    } finally { setPending(false); }
   }
 
   if (checking) {
@@ -63,10 +80,10 @@ function LoginForm({ oauthEnabled, devMode, errorCode, returnTo }: Props) {
     return (
       <div className="space-y-3">
         <p className="text-sm">{t("已登录为")}<strong>{user.displayName || user.username}</strong>{user.role === 'admin' ? t('（管理员）') : ''}</p>
-        {privateReading && user.role !== 'admin' ? (
-          <p role="alert" className="text-sm text-muted">{t("当前账号没有管理员权限，无法阅读私人文库。请在后台退出后使用管理员账号登录。")}</p>
-        ) : <a href={destination} className="btn btn-primary">{privateReading ? t('继续阅读') : t('进入后台')}</a>}
-        {privateReading && user.role !== 'admin' && <a href="/admin" className="btn">{t("前往后台")}</a>}
+        {privateReading && user.role !== 'admin' && <p role='alert' className='text-sm text-muted'>{t('私人文库仅向站主开放，你仍可在前台参与评论与留言。')}</p>}
+        <a href={authorizedLoginDestination(destination, user.role)} className='btn btn-primary'>{user.role === 'admin' && destination.startsWith('/admin') ? t('进入后台') : privateReading && user.role === 'admin' ? t('继续阅读') : t('返回数字花园')}</a>
+        <button type='button' className='btn' disabled={pending} onClick={logout}>{t('退出')}</button>
+        {message && <p role='alert' className='text-sm text-accent'>{t(message)}</p>}
       </div>
     );
   }

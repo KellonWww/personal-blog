@@ -10,7 +10,7 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 export const sessionMiddleware: MiddlewareHandler<AppBindings> = async (c, next) => {
   const { name } = sessionCookie(c.env);
   const token = getCookie(c, name);
-  const user = await getCurrentSession(c.env.DB, token);
+  const user = await getCurrentSession(c.env.DB, token, c.env);
   c.set('user', user ?? null);
   await next();
 };

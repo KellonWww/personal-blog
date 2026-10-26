@@ -1099,5 +1099,9 @@
   "此项被已发布的档案关联稿使用，请先撤回相关稿件再修改或删除": "Published archive-linked posts use this term. Withdraw those posts before editing or deleting it.",
   "同类型的名称或路径已存在，请换一个": "A name or slug of this type already exists. Choose another.",
   "此分类还有子分类，请先处理子分类": "This category has child categories. Handle them first.",
-  "保存结果待核对，名称、路径或关联状态可能已变化，请刷新列表核对后重试": "Verify the result by refreshing the list. The name, slug or linked posts may have changed."
+  "保存结果待核对，名称、路径或关联状态可能已变化，请刷新列表核对后重试": "Verify the result by refreshing the list. The name, slug or linked posts may have changed.",
+  "欢迎回来": "Welcome back",
+  "登录后参与评论与留言，留下你的想法。": "Sign in to join the conversation and share your thoughts.",
+  "私人文库仅向站主开放，你仍可在前台参与评论与留言。": "The private library is for the site owner only. You can still comment and leave messages on the public site.",
+  "退出失败，请稍后重试": "Could not sign out. Please try again later."
 }

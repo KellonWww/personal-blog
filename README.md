@@ -56,7 +56,7 @@ npm run dev                 # http://localhost:4321
 ### 本地登录
 
 本地通过 `POST /api/auth/dev-login` 创建管理员会话（仅 `ENVIRONMENT=development && AUTH_DEV_MODE=true` 时可用）。
-页面入口：`/admin/login`。
+公开登录入口：`/login`（旧入口 `/admin/login` 自动跳转）。普通访客可登录评论和留言；后台页面、编辑器与管理接口仅向 `GITHUB_ADMIN_USERNAME` 配置的站主开放，服务端在输出页面前验证会话，历史管理员角色不能绕过站主校验。
 
 ### 中英文界面
 
@@ -167,6 +167,8 @@ wrangler deploy
 |------|------|
 | `scripts/ui-motion-test.mjs` | 前台内页与后台双主题、320–1440px 布局、键盘导航、减少动态效果、无 JS 阅读（只读，不改数据） |
 | `scripts/language-ui-test.mjs` | 中英文界面切换（只读页面，后台 API 用模拟数据） |
+| `scripts/admin-access-test.mjs` | 隔离会话夹具：页面渲染前鉴权、旧管理员降权、接口拒绝和回跳安全；不访问真实数据库 |
+| `scripts/admin-moderation-ui-test.mjs` | 真实组件与构建 CSS：双语双主题、320–1440px、互动列表留白、批量审核、错误重试与公开退出；仅内存 mock |
 | `scripts/admin-redesign-test.mjs` | 后台编辑室：双主题、320–1440px、六个后台视图、编辑器、未保存保护、空态/重试（API 全部只读 mock） |
 | `scripts/taxonomy-ui-test.mjs` | 分类与标签界面（mock，不写真实数据） |
 | `scripts/friends-ui-test.mjs` | 友链增删改排序、保存与重载（mock，不写真实数据库） |
@@ -182,6 +184,7 @@ wrangler deploy
 npm run test:toolbox                      # 工具箱核心回归
 node --test scripts/friends.test.mjs      # 友链专项
 node scripts/taxonomy-api-test.mjs        # 分类标签（内存库）
+node scripts/admin-access-test.mjs        # 隔离后台页面与接口权限回归
 node scripts/admin-api-test.mjs           # 后台鉴权与非法输入（不修改内容）
 ```
 

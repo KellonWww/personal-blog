@@ -29,10 +29,10 @@ export const privateLibrary: MiddlewareHandler = async (context, next) => {
   }
   try {
     const token = context.cookies.get(sessionCookie(env).name)?.value;
-    const user = await getCurrentSession(env.DB, token);
+    const user = await getCurrentSession(env.DB, token, env);
     if (!user) {
       const query = new URLSearchParams({ returnTo: context.url.pathname + context.url.search });
-      return protectResponse(context.redirect('/admin/login?' + query, 302));
+      return protectResponse(context.redirect('/login?' + query, 302));
     }
     if (user.role !== 'admin') {
       return protectResponse(new Response('私人文库仅限管理员访问。', { status: 403 }));

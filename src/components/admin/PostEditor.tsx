@@ -58,7 +58,7 @@ function PostEditor({ postId }: Props) {
     (async () => {
       const me = await adminRequest<{ user: SessionUser | null }>('/api/auth/me', { signal: controller.signal });
       if (!me.user) { window.location.assign('/admin/login'); return; }
-      if (me.user.role !== 'admin') throw new Error('当前账号没有管理员权限');
+      if (me.user.role !== 'admin') { window.location.replace('/'); return; }
       const taxonomy = await adminRequest<{ categories: TaxonomyOption[]; tags: TaxonomyOption[] }>('/api/admin/taxonomy', { signal: controller.signal });
       const detail = postId ? await adminRequest<PostDetail>(`/api/admin/posts/${postId}`, { signal: controller.signal }) : null;
       if (controller.signal.aborted) return;

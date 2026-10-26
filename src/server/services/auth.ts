@@ -61,7 +61,8 @@ export async function completeGitHubLogin(db: D1Database, env: Env, code: string
       email = emails.find((item) => item.primary && item.verified)?.email ?? emails.find((item) => item.verified)?.email ?? '';
     }
   }
-  const isAdmin = profile.login === (env.GITHUB_ADMIN_USERNAME ?? '');
+  const owner = env.GITHUB_ADMIN_USERNAME?.trim().toLowerCase();
+  const isAdmin = Boolean(owner) && profile.login.toLowerCase() === owner;
   const user = await upsertUser(db, {
     id: `usr_${profile.id}`,
     githubId: String(profile.id),
@@ -97,12 +98,19 @@ export async function createUserSession(db: D1Database, userId: string): Promise
   return token;
 }
 
-export async function getCurrentSession(db: D1Database, token: string | undefined): Promise<ReturnType<typeof getSessionUser>> {
+export async function getCurrentSession(db: D1Database, token: string | undefined, env: Env): Promise<ReturnType<typeof getSessionUser>> {
   if (!token) {
     return Promise.resolve(null);
   }
   const tokenHash = await sha256Hex(token);
-  return getSessionUser(db, tokenHash);
+  const user = await getSessionUser(db, tokenHash);
+  if (!user || user.role !== 'admin') return user;
+  // A historical admin role must not grant access to someone other than the owner.
+  const owner = env.GITHUB_ADMIN_USERNAME?.trim().toLowerCase();
+  const isOwner = Boolean(owner) && user.username.toLowerCase() === owner;
+  const isDevelopmentOwner = env.ENVIRONMENT === 'development' && env.AUTH_DEV_MODE === 'true'
+    && user.id === 'usr_dev_' + (env.DEV_ADMIN_USERNAME ?? 'laoda');
+  return isOwner || isDevelopmentOwner ? user : { ...user, role: 'user' };
 }
 
 export async function revokeSession(db: D1Database, token: string | undefined): Promise<void> {

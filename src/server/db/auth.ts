@@ -69,7 +69,7 @@ export async function upsertUser(db: D1Database, input: {
            display_name = ?,
            email = ?,
            avatar_url = ?,
-           role = CASE WHEN role = 'admin' THEN 'admin' ELSE ? END,
+           role = ?,
            updated_at = datetime('now'),
            updated_by = ?
          WHERE id = ?`,
@@ -80,7 +80,7 @@ export async function upsertUser(db: D1Database, input: {
       const cause = error instanceof DatabaseError ? error.cause : null;
       if (!(cause instanceof Error) || !cause.message.includes('ARCHIVE_PUBLICATION_CONFIRM_REQUIRED')) { throw error; }
       await execute(db,
-        "UPDATE users SET email = ?, role = CASE WHEN role = 'admin' THEN 'admin' ELSE ? END, " +
+        "UPDATE users SET email = ?, role = ?, " +
         "updated_at = datetime('now'), updated_by = ? WHERE id = ? AND github_id = ? AND deleted_at IS NULL",
         [input.email, input.role, existing.id, existing.id, input.githubId]);
     }

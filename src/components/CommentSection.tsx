@@ -142,7 +142,7 @@ function CommentSection({ slug, initialComments, initialTotal }: Props) {
     <section className="border-t border-line pt-8" aria-label={t("评论区")}>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold tracking-tight">{t("评论")}<span className="font-mono text-sm text-muted tabular-nums">{total}</span></h2>
-        {user ? <span className="text-xs text-muted">{t("已登录：")}{user.displayName || user.username}</span> : <a href="/admin/login" className="text-xs text-accent">{t("登录后评论")}</a>}
+        {user ? <span className="text-xs text-muted">{t("已登录：")}{user.displayName || user.username}</span> : <a href="/login" className="text-xs text-accent">{t("登录后评论")}</a>}
       </div>
 
       {user ? (
@@ -167,7 +167,7 @@ function CommentSection({ slug, initialComments, initialTotal }: Props) {
           </div>
         </form>
       ) : (
-        <p className="mb-6 border-l-2 border-line pl-4 text-sm text-muted">{t("评论需要登录。生产环境使用 GitHub 登录，本地可前往")}<a href="/admin/login" className="text-accent">{t("登录页")}</a>{t("使用开发登录。")}</p>
+        <p className="mb-6 border-l-2 border-line pl-4 text-sm text-muted">{t("评论需要登录。生产环境使用 GitHub 登录，本地可前往")}<a href="/login" className="text-accent">{t("登录页")}</a>{t("使用开发登录。")}</p>
       )}
 
       {message && <p className="mb-4 text-sm text-accent">{t(message)}</p>}

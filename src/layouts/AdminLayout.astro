@@ -5,7 +5,6 @@ Astro.response.headers.set('Vary', 'Cookie');
 const locale = getLocale(Astro.cookies.get(LOCALE_COOKIE)?.value);
 const t = translator(locale);
 
-import LanguageSwitcher from '@/components/LanguageSwitcher.astro';
 import '@fontsource-variable/outfit';
 import '@/styles/globals.css';
 import '@/styles/admin.css';
@@ -46,7 +45,6 @@ const { title } = Astro.props;
     </script>
   </head>
   <body class="admin-site min-h-screen bg-surface text-ink">
-    {Astro.url.pathname === "/admin/login" && <div class="admin-language"><LanguageSwitcher /></div>}
     <slot />
   </body>
 </html>

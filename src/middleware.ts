@@ -1,4 +1,5 @@
 import { defineMiddleware, sequence } from 'astro:middleware';
+import { adminWorkspace } from '@/server/middleware/admin';
 import { privateLibrary } from '@/server/middleware/private-library';
 
 const LEGACY_HOST = 'personal-blog.stock-backend-wkl.workers.dev';
@@ -17,4 +18,4 @@ const legacyRedirect = defineMiddleware((context, next) => {
   return context.redirect(target.toString(), 308);
 });
 
-export const onRequest = sequence(privateLibrary, legacyRedirect);
+export const onRequest = sequence(adminWorkspace, privateLibrary, legacyRedirect);
